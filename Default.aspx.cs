@@ -13,28 +13,16 @@ public partial class _Default : System.Web.UI.Page
 {
     tblPrcs tp = new tblPrcs();
     cmnPrcs cp = new cmnPrcs();
-    String D_connIP, D_connUser, D_connPwd,  D_status,initDB;
-    String connectDB;
-    string[] ALL;
+     string D_status;
    
 
     protected void Page_Load(object sender, EventArgs e)
     {
         sapReportPrms sapReportPrms = new sapReportPrms();
-        ALL = sapReportPrms.SQL();
 
-        D_connIP = ALL[0].Trim();
-        D_connUser = ALL[1].Trim();
-        D_connPwd = ALL[2].Trim();
+        string[] ALL = sapReportPrms.SQL();
         D_status = ALL[4];
-        initDB = ALL[7].Trim();
 
-        //合併連接字串
-        //"Data Source=192.168.0.25;Initial Catalog=UOF;User ID=xx;Password=xxxx";
-        connectDB = "Data Source=" + D_connIP + ";"
-                               + "Initial Catalog=" + initDB + ";"
-                               + "User ID=" + D_connUser + ";"
-                               + "Password=" + D_connPwd;
         //True or False
         if (D_status == "False")
         {
@@ -105,8 +93,6 @@ public partial class _Default : System.Web.UI.Page
                 break;
         } */
 
-        //傳connectDB字串至Result.aspx
-        Session["connectDB"] = connectDB;
         Response.Redirect("result.aspx");
 
     }

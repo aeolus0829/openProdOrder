@@ -14,12 +14,11 @@ namespace nsTblPrcs
     /// Summary description for tblPrcs
     /// </summary>
     public class tblPrcs
-    {   
-      
+    {
         // public string connectionString = "Data Source=192.168.0.16;Initial Catalog=jw_dbfdb;Uid=jw;Pwd=jw;";
         //public string connectionString = "Data Source=192.168.0.16;Initial Catalog=PRD;User ID=archer;Password=ko123vr4";
-        //public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF;User ID=SA;Password=Jinud-98A";
-        public string connectionString;
+        public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF;User ID=SA;Password=Jinud-98A";
+
         public bool result = false;
 
         public DataTable mkTbl(DataTable dt,string[] dtClmnHdrs, ArrayList dataRslts)
@@ -298,5 +297,5 @@ namespace nsTblPrcs
             return results;
         }
 
-    } 
+    } //    public class tblPrcs
 }

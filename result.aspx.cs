@@ -12,18 +12,11 @@ using nsCmnPrcs;
         
 public partial class result : System.Web.UI.Page
 {
-    
     tblPrcs tp = new tblPrcs();
     cmnPrcs cp = new cmnPrcs();
 
     protected void Page_Load(object sender, EventArgs e)
-    {   
-        //接收來自Default.aspx字串
-        string Result_connectDB = Session["connectDB"] as string;
-        //呼叫 tblPrcs tp 程式裡的 string connectionString
-        //將connectDB 放置 connectionString
-        tp.connectionString = Result_connectDB;
-
+    {
         btnToExcel.Visible = true;
         hlQry0.Visible = true;
 

@@ -13,7 +13,7 @@ public class sapReportPrms
 {
             string cs = "Data Source=192.168.0.9;Initial Catalog=rptsvrDB ;User ID=rptsvrDB ;Password=adminrp";
             string qs = "select * from rptsvrDB.dbo.sapReportPrms where(1=1) AND sapReportPrms.rptNm ='bpm_icm'";
-            String D_connIP, D_connUser, D_connPwd, D_rptNm, D_status, D_connClient, D_connLanguage, initDB;
+            String D_connIP,D_connUser,  D_connPwd,  D_rptNm, D_status, D_connClient,  D_connLanguage;
             string []ALL;
 
 
@@ -40,7 +40,6 @@ public class sapReportPrms
                       int intstatus = dr.GetOrdinal("status");
                       int intclient = dr.GetOrdinal("connClient");
                       int intlanguage = dr.GetOrdinal("connLanguage");
-                      int intinitDB = dr.GetOrdinal("initDB");
                       D_connIP = dr[intIP].ToString();
                       D_connUser = dr[intUser].ToString();
                       D_connPwd =dr[intPwd].ToString();
@@ -48,11 +47,11 @@ public class sapReportPrms
                       D_status = dr[intstatus].ToString();
                       D_connClient = dr[intclient].ToString();
                       D_connLanguage = dr[intlanguage].ToString();
-                      initDB = dr[intinitDB].ToString();
 
-                       ALL = new string[8] { D_connIP, D_connUser, D_connPwd, D_rptNm, D_status,
-                          D_connClient, D_connLanguage,initDB };
+                       ALL = new string[7] { D_connIP, D_connUser, D_connPwd, D_rptNm, D_status,
+                          D_connClient, D_connLanguage };
                   }
+                cn.Close();
                 return ALL;
              }
                 finally 
