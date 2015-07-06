@@ -214,8 +214,7 @@
         註2: 日期若起訖為同一天，輸入起始日期就好<br />
     註3: 欄位標示為 % 表示輸入部份資料即可<br />
         <br />
-    <asp:HyperLink ID="hl" runat="server" NavigateUrl="http://rptsvr/sap/" 
-        TabIndex="99">回主畫面</asp:HyperLink>
+        <asp:HyperLink ID="hlBack" runat="server" NavigateUrl="/bpm/">回BPM報表畫面</asp:HyperLink>
         <br />
         <br />
     </form>

@@ -19,10 +19,7 @@ public partial class result : System.Web.UI.Page
     {
         btnToExcel.Visible = true;
         hlQry0.Visible = true;
-
-        //取得本月份的第一天，例：2014/7/1
         DateTime fd = cp.firstDayOfMonth();
-        //取得本月份的最後一天，例：2014/7/31
         DateTime ld = cp.lastDayOfMonth();
 
         /* 與下行的差異是來源單號、物料文件兩個欄位
@@ -34,30 +31,27 @@ public partial class result : System.Web.UI.Page
         strSQL += " AND ENTRY_QNT<>0";
         Session["sql"] = strSQL;
 
-        //ArrayList alDS = tp.getAryLs(strSQL);
         dbInit(strSQL);
     }
 
     private void dbInit(string sql)
-    {
-
-        DataSet ds = tp.qrySql(sql);
+    {        
         try
         {
-            sql += " ORDER BY BPM單號";
-
-            gvList.DataSource = ds;
-
-            //lblDataCnt.Text = sql;
-            //gvList.Sort("BPM單號", SortDirection.Ascending);            
-            
-            gvList.DataBind();
-            
-            if (gvList.Rows.Count == 0) {
+            //sql += " ORDER BY BPM單號";
+            DataSet ds = tp.qrySql(sql);
+            if (ds.Tables[0].Rows.Count == 0)
+            {
                 btnToExcel.Visible = false;
                 hlQry0.Visible = false;
             }
-            //lblDataCnt.Text = "查到的資料共 " + gvList.Rows.Count.ToString() + " 筆";
+            else {
+                gvList.DataSource = ds;                
+                gvList.DataBind();
+            }
+            //lblDataCnt.Text = sql;               
+            lblDataCnt.Text = "查到的資料共 " + gvList.Rows.Count.ToString() + " 筆";
+            ds.Dispose();
         }
         catch (Exception ex)
         { 
@@ -66,11 +60,6 @@ public partial class result : System.Web.UI.Page
                 HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
                 //Response.Write(sql + "<br/>");
             }
-            finally
-            {
-                ds.Clear();
-            
-        }
     }
    
     protected void gvList_Sorting(object sender, GridViewSortEventArgs e)

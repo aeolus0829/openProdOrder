@@ -181,46 +181,6 @@ namespace nsTblPrcs
             {
                 conn.Open();
                 SqlDataAdapter da = new SqlDataAdapter(comm);
-                /*
-                da.Fill(ds, "WKF");
-                DataTable dt = ds.Tables["WKF"];
-                ds.Tables.Add(dt);
-                DataTable prDt = new DataTable();
-                ArrayList alRows;
-                //string doc_nbr, fromDoc_nbr, mtrlDoc;
-
-                foreach (DataRow row in dt.Rows)
-                {
-                    /*
-                    doc_nbr = row[0].ToString();
-                    fromDoc_nbr = row[1].ToString();
-                    mtrlDoc = row[7].ToString();
-                     
-
-                    for (int i = 0; i < row.Table.Columns.Count; i++)
-                    { 
-                        switch (i);
-                        {
-                            case 0:
-                            break;
-                            case 1:
-                            break;
-                            case 7:
-                            break;
-                            default:
-                        }                        
-                    }
-
-                }
-                /*
-                for (int i = 0; i < ds.Tables["WKF"].Rows.Count; i++)
-                {
-                    //strUserID = ObjDS.Tables["RegInfo"].Rows[i]["UserID"].ToString();//資料一筆一筆存入StrUserID
-                    
-
-
-                }
-            */
                 da.Fill(ds);
             }
             catch (Exception ex)
@@ -233,6 +193,7 @@ namespace nsTblPrcs
             finally
             {
                 conn.Close();
+                comm.Dispose();
             }
             return ds;
         }
