@@ -17,7 +17,7 @@ namespace nsTblPrcs
     {
         // public string connectionString = "Data Source=192.168.0.16;Initial Catalog=jw_dbfdb;Uid=jw;Pwd=jw;";
         //public string connectionString = "Data Source=192.168.0.16;Initial Catalog=PRD;User ID=archer;Password=ko123vr4";
-        public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF;User ID=SA;Password=Jinud-98A";
+        public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF_DEV;User ID=SA;Password=Jinud-98A";
 
         public bool result = false;
 
@@ -165,7 +165,7 @@ namespace nsTblPrcs
             return result;
         }
 
-        public DataSet qrySql(string strSQL)
+        public DataTable qrySql(string strSQL)
         {
             SqlConnection conn;
             SqlCommand comm;
@@ -173,6 +173,7 @@ namespace nsTblPrcs
 
             //DataTable dt = new DataTable();            
             DataSet ds = new DataSet();
+            DataTable dt = new DataTable();
 
             conn = new SqlConnection(connectionString);
             comm = new SqlCommand(strSQL, conn);
@@ -181,7 +182,8 @@ namespace nsTblPrcs
             {
                 conn.Open();
                 SqlDataAdapter da = new SqlDataAdapter(comm);
-                da.Fill(ds);
+                da.Fill(dt);
+                da.Dispose();
             }
             catch (Exception ex)
             {
@@ -192,10 +194,10 @@ namespace nsTblPrcs
             }
             finally
             {
-                conn.Close();
                 comm.Dispose();
+                conn.Close();
             }
-            return ds;
+            return dt;
         }
 
         protected void alertMsg(bool result,string data)

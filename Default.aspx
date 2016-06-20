@@ -40,6 +40,22 @@
         .auto-style6 {
             width: 290px;
         }
+        .auto-style7 {
+            width: 122px;
+            height: 78px;
+        }
+        .auto-style8 {
+            width: 219px;
+            height: 78px;
+        }
+        .auto-style9 {
+            width: 116px;
+            height: 78px;
+        }
+        .auto-style10 {
+            width: 290px;
+            height: 78px;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +91,7 @@
                 </td>
             </tr>            
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
+                <td bgcolor="#3399FF" class="style5">
                     BPM單號</td>
                 <td class="auto-style1">
                     <asp:TextBox ID="txtBpmNo" runat="server" TabIndex="5"></asp:TextBox>
@@ -86,19 +102,19 @@
                 </td>
             </tr>
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
+                <td bgcolor="#3399FF" class="style5">
                     採購單號 %</td>
                 <td class="auto-style1">
                     <asp:TextBox ID="txtBpmPo" runat="server" TabIndex="6"></asp:TextBox>
                 </td>
-                <td bgcolor="#99CCFF" class="style3">
+                <td bgcolor="#3399FF" class="style3">
                     物料文件號碼 %</td>
                 <td class="auto-style6">
                     <asp:TextBox ID="txtMtrlDocNbr" runat="server" TabIndex="7"></asp:TextBox>
                 </td>
             </tr>
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
+                <td bgcolor="#3399FF" class="style5">
                     供應商名稱 %</td>
                 <td class="auto-style1">
                     <asp:TextBox ID="txtVndrNm" runat="server" TabIndex="8"></asp:TextBox>
@@ -109,7 +125,7 @@
                     &nbsp;</td>
             </tr>
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
+                <td bgcolor="#3399FF" class="style5">
                     物料號碼 %</td>
                 <td class="auto-style1">
                     <asp:TextBox ID="txtMatnr" runat="server" TabIndex="9"></asp:TextBox>
@@ -120,7 +136,7 @@
                     &nbsp;</td>
             </tr>
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
+                <td bgcolor="#3399FF" class="style5">
                     工單料號 %</td>
                 <td class="auto-style1">
                     <asp:TextBox ID="txtOrdMtrl" runat="server" TabIndex="10"></asp:TextBox>
@@ -168,19 +184,19 @@
                     </td>
             </tr>
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
+                <td bgcolor="#99CCFF" class="auto-style7">
                     檢驗結果</td>
-                <td class="auto-style1">
+                <td class="auto-style8">
                     <asp:RadioButtonList ID="rdblQA" runat="server" TabIndex="14" OnSelectedIndexChanged="rdblQA_SelectedIndexChanged">
                         <asp:ListItem Selected="True">全部</asp:ListItem>
                         <asp:ListItem>合格</asp:ListItem>
                         <asp:ListItem>不合格</asp:ListItem>
                     </asp:RadioButtonList>
                 </td>
-                <td bgcolor="White" class="style3">
-                    &nbsp;</td>
-                <td class="auto-style6">
-                    &nbsp;</td>
+                <td bgcolor="White" class="auto-style9">
+                    </td>
+                <td class="auto-style10">
+                    </td>
             </tr>
             <tr>
                 <td class="style5">
@@ -210,10 +226,12 @@
     
     </div>
     <br />
-    註1: BPM文件日期 2014/7/11後才有檢驗結果及特採狀態可查詢，格式 20131231<br />
-        註2: 日期若起訖為同一天，輸入起始日期就好<br />
-    註3: 欄位標示為 % 表示輸入部份資料即可<br />
-        <br />
+        <ul>
+            <li>BPM文件日期 2014/7/11後才有檢驗結果及特採狀態可查詢，格式 20131231</li>
+            <li>日期若起訖為同一天，輸入起始日期就好</li>
+            <li>欄位標示為 % 表示輸入部份資料即可</li>            
+        </ul>
+
         <asp:HyperLink ID="hlBack" runat="server" NavigateUrl="/bpm/">回BPM報表畫面</asp:HyperLink>
         <br />
         <br />

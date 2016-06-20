@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Collections;
 using nsTblPrcs;
 using nsCmnPrcs;
 
@@ -48,26 +41,32 @@ public partial class _Default : System.Web.UI.Page
         Session.Abandon();
     }
     protected void btnSubmt_Click(object sender, EventArgs e)
-    {        
-        if (txtBpmBeginS.Text != "") Session["sqlFltr"] += " AND BEGIN_TIME>='" + cp.convertToDatef(txtBpmBeginS.Text.Trim()) + " 00:00'";
-        if (txtBpmBeginE.Text != "")
-        { Session["sqlFltr"] += " AND BEGIN_TIME<='" + cp.convertToDatef(txtBpmBeginE.Text.Trim()) + " 23:59'"; }
+    {
+        string today = DateTime.Today.ToShortDateString();
+
+        if (txtBpmBeginS.Text != "") Session["dateFltr"] = " AND BEGIN_TIME>='" + cp.convertToDatef(txtBpmBeginS.Text.Trim()) + " 00:00'";
+        else Session["dateFltr"] += " AND BEGIN_TIME>='" + today + " 00:00'";
+
+        if (txtBpmBeginE.Text != "")  Session["dateFltr"] += " AND BEGIN_TIME<='" + cp.convertToDatef(txtBpmBeginE.Text.Trim()) + " 23:59'";
         else txtBpmBeginE.Text = txtBpmBeginS.Text;
-        if (txtBpmEndS.Text != "") Session["sqlFltr"] += " AND END_TIME>='" + cp.convertToDatef(txtBpmEndS.Text.Trim()) + " 00:00'";
-        if (txtBpmEndE.Text != "")
-        { Session["sqlFltr"] += " AND END_TIME<='" + cp.convertToDatef(txtBpmEndE.Text.Trim()) + " 23:59'"; }
+
+        if (txtBpmEndS.Text != "") Session["dateFltr"] += " AND END_TIME>='" + cp.convertToDatef(txtBpmEndS.Text.Trim()) + " 00:00'";
+        else Session["dateFltr"] += " AND END_TIME>='" + today + " 00:00'";
+
+        if (txtBpmEndE.Text != "") Session["dateFltr"] += " AND END_TIME<='" + cp.convertToDatef(txtBpmEndE.Text.Trim()) + " 23:59'"; 
         else txtBpmEndE.Text = txtBpmEndS.Text;
-        if (txtBpmNo.Text != "") Session["sqlFltr"] += " AND DOC_NBR LIKE '%" + txtBpmNo.Text.Trim() + "%'";
-        if (txtBpmPo.Text != "") Session["sqlFltr"] += " AND PO LIKE '%" + txtBpmPo.Text.Trim() + "%'";
-        if (txtMtrlDocNbr.Text != "") Session["sqlFltr"] += " AND MTRLDOC LIKE '%" + txtMtrlDocNbr.Text.Trim() + "%'";
-        if (txtOrdMtrl.Text != "") Session["sqlFltr"] += " AND ORD_MATERIAL LIKE '%" + txtOrdMtrl.Text.Trim() + "%'";
-        if (txtMatnr.Text!="") Session["sqlFltr"] += " AND MATERIAL like '%"+ txtMatnr.Text.Trim()+"%'";
-        if (txtVndrNm.Text != "") Session["sqlFltr"] += " AND VENDOR_NAME like '%" + txtVndrNm.Text.Trim() + "%'";
-        if (ddlMvt.SelectedIndex != 0) Session["sqlFltr"] += " AND MOVE_TYPE='"+ddlMvt.SelectedValue+"'";
-        if (rdblQA.SelectedIndex != 0) Session["sqlFltr"] += " AND QAresult ='" + rdblQA.SelectedValue + "'";
-        if (rbSample.SelectedValue == "Y") Session["sqlFltr"] += " AND RDpersen <>''";
-        if (ddlQA.SelectedIndex != 0) Session["sqlFltr"] += " AND " + ddlQA.SelectedValue + "";
-        
+
+        if (txtBpmNo.Text != "") Session["ftr"] = " AND DOC_NBR LIKE '%" + txtBpmNo.Text.Trim() + "%'";
+        if (txtBpmPo.Text != "") Session["ftr"] += " AND PO LIKE '%" + txtBpmPo.Text.Trim() + "%'";
+        if (txtMtrlDocNbr.Text != "") Session["ftr"] += " AND MTRLDOC LIKE '%" + txtMtrlDocNbr.Text.Trim() + "%'";
+        if (txtOrdMtrl.Text != "") Session["ftr"] += " AND ORD_MATERIAL LIKE '%" + txtOrdMtrl.Text.Trim() + "%'";
+        if (txtMatnr.Text != "") Session["ftr"] += " AND MATERIAL like '%" + txtMatnr.Text.Trim() + "%'";
+        if (txtVndrNm.Text != "") Session["ftr"] += " AND VENDOR_NAME like '%" + txtVndrNm.Text.Trim() + "%'";
+        if (ddlMvt.SelectedIndex != 0) Session["ftr"] += " AND MOVE_TYPE='" + ddlMvt.SelectedValue + "'";
+        if (rdblQA.SelectedIndex != 0) Session["ftr"] += " AND QAresult ='" + rdblQA.SelectedValue + "'";
+        if (rbSample.SelectedValue == "Y") Session["ftr"] += " AND RDpersen <>''";
+        if (ddlQA.SelectedIndex != 0) Session["ftr"] += " AND '" + ddlQA.SelectedValue + "'";
+
         Response.Redirect("result.aspx");
     }
 
