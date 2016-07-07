@@ -200,6 +200,54 @@ namespace nsTblPrcs
             return dt;
         }
 
+        public DataTable combineDt(string today, string old)
+        {
+            SqlConnection conn;
+            SqlCommand commToday, commOld;
+            DataTable dtToday = new DataTable();
+            DataTable dtOld = new DataTable();
+            DataTable dt = new DataTable();
+
+            conn = new SqlConnection(connectionString);
+            commToday = new SqlCommand(today, conn);
+            commOld = new SqlCommand(old, conn);
+
+            /*
+             * 
+            if (dtToday.Rows.Count > 0) dt.Merge(dtToday);
+            if (dtOld.Rows.Count > 0) dt.Merge(dtOld);
+            */
+
+            try
+            {
+                conn.Open();
+                SqlDataAdapter daToday = new SqlDataAdapter(commToday);
+                SqlDataAdapter daOld = new SqlDataAdapter(commOld);
+
+                daToday.Fill(dtToday);daToday.Dispose();
+                daOld.Fill(dtOld);daOld.Dispose();
+
+                if (dtToday.Rows.Count > 0) dt.Merge(dtToday);
+                if (dtOld.Rows.Count > 0) dt.Merge(dtOld);
+            }
+            catch (Exception ex)
+            {
+                HttpContext.Current.Response.Write(ex + " 錯誤<br/>");
+                HttpContext.Current.Response.Write("<ul><li>請回前一頁檢查輸入條件有沒有問題</li>");
+                HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
+                //Response.Write(strSQL + "<br/>");
+            }
+            finally
+            {
+                commToday.Dispose();
+                commOld.Dispose();
+                dtToday.Dispose();
+                dtOld.Dispose();                
+                conn.Close();
+            }
+            return dt;
+        }
+
         protected void alertMsg(bool result,string data)
         {
             Literal rslt = new Literal();

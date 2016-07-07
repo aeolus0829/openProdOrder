@@ -181,7 +181,7 @@
                 <td bgcolor="White" class="auto-style4">
                     </td>
                 <td class="auto-style5">
-                    </td>
+                    &nbsp;</td>
             </tr>
             <tr>
                 <td bgcolor="#99CCFF" class="auto-style7">
@@ -196,6 +196,7 @@
                 <td bgcolor="White" class="auto-style9">
                     </td>
                 <td class="auto-style10">
+                    <asp:CheckBox ID="cbRecent" runat="server" Checked="True" Text="資料範圍：到去年為止" />
                     </td>
             </tr>
             <tr>

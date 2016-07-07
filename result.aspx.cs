@@ -9,7 +9,10 @@ public partial class result : System.Web.UI.Page
 {
     tblPrcs tp = new tblPrcs();
     cmnPrcs cp = new cmnPrcs();
-    public string dateFltr, fltr;
+
+    public string dateFltr { get; set; }
+    public string fltr { get; set; }
+    public string lastYear { get; set; }
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -20,23 +23,50 @@ public partial class result : System.Web.UI.Page
         DateTime lastDayOM = cp.lastDayOfMonth();
 
         dateFltr = Session["dateFltr"].ToString();
-        if (Session["ftr"].ToString()!="") fltr = Session["ftr"].ToString();
-        else fltr = "";
 
-        string strSQL = "select DOC_NBR as 'BPM單號',convert(varchar,BEGIN_TIME,111) as 'BPM起單日',convert(varchar,BEGIN_TIME,108) as 'BPM起單時',convert(varchar,END_TIME,111) as 'BPM結單日',convert(varchar,END_TIME,108) as 'BPM結單時',fromDOC as '來源單號', mtrlDOC as '物料文件',case task_status when '1' then '未簽' when '2' then '結案' when '4' then '退簽' end as '簽核狀態', SUB_FLOW_NAME AS '站點',QAresult AS '檢驗結果',RDpersen AS '樣品負責人', excpMIt as 特採狀態, MOVE_TYPE as '異動類型', PO as '採購單號', POITEM as '採購項次', VENDOR_NAME as '供應商',MATERIAL as '物料號碼',ORDERID as '工單號碼',ORD_MATERIAL as '工單料號',SHORT_TEXT as '短文',ENTRY_QNT as '收貨數',case PO_UNIT when 'ST' then 'PC' end as '單位' from";
+        if (Session["ftr"] == null) fltr = "";
+        else fltr = Session["ftr"].ToString();
+
+        if (Session["recent"] == null) lastYear = "";
+        else lastYear = Session["recent"].ToString();
+
+        string strSQL = @"select DOC_NBR as 'BPM單號',
+            convert(varchar,BEGIN_TIME,111) as 'BPM起單日',
+            convert(varchar,BEGIN_TIME,108) as 'BPM起單時',
+            convert(varchar,END_TIME,111) as 'BPM結單日',
+            convert(varchar,END_TIME,108) as 'BPM結單時',
+            fromDOC as '來源單號', 
+            mtrlDOC as '物料文件',
+            case 
+                task_status 
+                    when '1' then '未簽' 
+                    when '2' then '結案' 
+                    when '4' then '退簽'
+            end as '簽核狀態', 
+            SUB_FLOW_NAME AS '站點',
+            QAresult AS '檢驗結果',
+            RDpersen AS '樣品負責人', 
+            excpMIt as 特採狀態, 
+            MOVE_TYPE as '異動類型', 
+            PO as '採購單號', 
+            POITEM as '採購項次', 
+            VENDOR_NAME as '供應商',
+            MATERIAL as '物料號碼',
+            ORDERID as '工單號碼',
+            ORD_MATERIAL as '工單料號',
+            SHORT_TEXT as '短文',
+            ENTRY_QNT as '收貨數',
+            case 
+                PO_UNIT 
+                    when 'ST' then 'PC' 
+            end as '單位' from";
 
         string todaySql = procSQLstring(strSQL, "today");
         string oldSql = procSQLstring(strSQL, "old");
 
-        try
-        {
-            dbInit(todaySql, oldSql);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        DataTable dt = tp.combineDt(todaySql, oldSql);
 
+        bindGv(dt);
     }
 
     private string procSQLstring(string stringSql, string queryOption)
@@ -49,8 +79,9 @@ public partial class result : System.Web.UI.Page
         }
         else
         {
-            stringSql += " TB_ICM_Item where (1=1)";
+            stringSql += " TB_ICM_Item where (1=1)";            
             stringSql += fltr;
+            stringSql += lastYear;
         }
 
         stringSql += " AND ENTRY_QNT<>0";
@@ -59,22 +90,13 @@ public partial class result : System.Web.UI.Page
         return stringSql;
     }
 
-    private void dbInit(string todaySql, string oldSql)
+    private void bindGv(DataTable dt)
     {
         DataSet ds = new DataSet();
-        DataTable dt = new DataTable();
-        DataTable dtToday = tp.qrySql(todaySql);
-        DataTable dtOld = tp.qrySql(oldSql);
+        //DataTable dt = new DataTable();
 
         try
         {
-
-            //sql += " ORDER BY BPM單號";
-            if (dtToday.Rows.Count > 0) dt.Merge(dtToday);
-            if (dtOld.Rows.Count > 0) dt.Merge(dtOld);
-
-            dtToday.Dispose();dtOld.Dispose();GC.Collect();
-
             if (dt.Rows.Count == 0)
             {
                 btnToExcel.Visible = false;

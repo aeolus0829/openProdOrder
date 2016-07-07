@@ -18,7 +18,7 @@
 &nbsp;<asp:HyperLink ID="hlQry0" runat="server" NavigateUrl="~/Default.aspx">回查詢畫面</asp:HyperLink>
     
         <asp:GridView ID="gvList" runat="server" ClientIDMode="Predictable" CellPadding="4" 
-            ForeColor="#333333" AllowSorting="True" onsorting="gvList_Sorting">
+            ForeColor="#333333" onsorting="gvList_Sorting">
             <AlternatingRowStyle BackColor="White" />
             <EditRowStyle BackColor="#2461BF" />
             <FooterStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
