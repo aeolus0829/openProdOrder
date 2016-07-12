@@ -4,6 +4,8 @@ using System.Web;
 using System.Web.UI.WebControls;
 using nsTblPrcs;
 using nsCmnPrcs;
+using System.Data.SqlClient;
+using System.Collections.Generic;
 
 public partial class result : System.Web.UI.Page
 {
@@ -13,15 +15,22 @@ public partial class result : System.Web.UI.Page
     public string dateFltr { get; set; }
     public string fltr { get; set; }
     public string lastYear { get; set; }
+    public List<string> vwCond { get; set; }
+    public List<string> tbCond { get; set; }
 
     protected void Page_Load(object sender, EventArgs e)
     {
         btnToExcel.Visible = true;
         hlQry0.Visible = true;
 
+        string today = DateTime.Today.ToShortDateString(); 
+
         DateTime firstDayOM = cp.firstDayOfMonth();
         DateTime lastDayOM = cp.lastDayOfMonth();
+        vwCond = (List<string>)Session["vwCond"];
+        tbCond = (List<string>)Session["tbCond"];
 
+        /*
         dateFltr = Session["dateFltr"].ToString();
 
         if (Session["ftr"] == null) fltr = "";
@@ -29,8 +38,10 @@ public partial class result : System.Web.UI.Page
 
         if (Session["recent"] == null) lastYear = "";
         else lastYear = Session["recent"].ToString();
+        */
 
-        string strSQL = @"select DOC_NBR as 'BPM單號',
+        string strSQL = @"
+            select DOC_NBR as 'BPM單號',
             convert(varchar,BEGIN_TIME,111) as 'BPM起單日',
             convert(varchar,BEGIN_TIME,108) as 'BPM起單時',
             convert(varchar,END_TIME,111) as 'BPM結單日',
@@ -71,23 +82,37 @@ public partial class result : System.Web.UI.Page
 
     private string procSQLstring(string stringSql, string queryOption)
     {
+
+        SqlCommand cmd = new SqlCommand();
         if (queryOption == "today")
         {
+            stringSql += " VW_ICM_Item{0}{1}";
+            /*
             stringSql += " VW_ICM_Item where (1=1)";
             stringSql += dateFltr;
             stringSql += fltr;
+            */
         }
         else
         {
+            stringSql += " TB_ICM_Item{0}{1}";
+            /*
             stringSql += " TB_ICM_Item where (1=1)";            
             stringSql += fltr;
             stringSql += lastYear;
+            */
         }
+        cmd.CommandText = string.Format(
+            stringSql,
+            vwCond.Count > 0 ? " WHERE " : "",
+            string.Join(" AND ", vwCond.ToArray())
+            );
 
-        stringSql += " AND ENTRY_QNT<>0";
+
+        //stringSql += " AND ENTRY_QNT<>0";
         // Session["sql"] = strSQL;
 
-        return stringSql;
+        return cmd.CommandText;
     }
 
     private void bindGv(DataTable dt)

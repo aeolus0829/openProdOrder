@@ -232,7 +232,10 @@ namespace nsTblPrcs
             }
             catch (Exception ex)
             {
-                HttpContext.Current.Response.Write(ex + " 錯誤<br/>");
+                //HttpContext.Current.Response.Write(ex + " combineDt() 錯誤<br/>");
+                HttpContext.Current.Response.Write("combineDt() 錯誤<br/>");
+                HttpContext.Current.Response.Write(today + "<br/>");
+                HttpContext.Current.Response.Write(old + "<br/>");
                 HttpContext.Current.Response.Write("<ul><li>請回前一頁檢查輸入條件有沒有問題</li>");
                 HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
                 //Response.Write(strSQL + "<br/>");
