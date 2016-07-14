@@ -53,10 +53,22 @@ public partial class _Default : System.Web.UI.Page
     {
         DataTable tbDt = buildSqlWithCondition();
 
-        tbDt.DefaultView.Sort = "BPM單號 ASC";
+        try
+        {
+            if (tbDt != null)
+            {
+                btnToExcel.Visible = true;
 
-        gvResult.DataSource = tbDt;
-        gvResult.DataBind();
+                tbDt.DefaultView.Sort = "BPM單號 ASC";
+
+                gvResult.DataSource = tbDt;
+                gvResult.DataBind();
+            }
+        }
+        catch (Exception)
+        {
+            Response.Write("依條件查詢，無任何資料");
+        }
 
         //Response.Redirect("result.aspx");
     }

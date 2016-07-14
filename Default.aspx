@@ -213,16 +213,16 @@
         </table>
     
     </div>
-    <br />
         <ul>
-            <li>BPM文件日期 2014/7/11後才有檢驗結果及特採狀態可查詢，格式 20131231</li>
-            <li>日期若起訖為同一天，輸入起始日期就好</li>
+            <li>BPM文件日期 2014/7/11後才有檢驗結果及特採狀態可查詢</li>
+            <li>若未輸入任何條件，只會顯示最近三個月的資料</li>
+            <li>日期若起訖為同一天，輸入起始日期就好，格式 20131231</li>
             <li>欄位標示為 % 表示輸入部份資料即可</li>            
         </ul>
 
         <asp:HyperLink ID="hlBack" runat="server" NavigateUrl="/bpm/">回BPM報表畫面</asp:HyperLink>
         <br />
-        <asp:Button ID="btnToExcel" runat="server" OnClick="btnToExcel_Click" Text="to Excel" />
+        <asp:Button ID="btnToExcel" runat="server" OnClick="btnToExcel_Click" Text="to Excel" Visible="False" />
         <br />
         <asp:GridView ID="gvResult" runat="server" BackColor="White" BorderColor="#999999" BorderStyle="None" BorderWidth="1px" CellPadding="3" GridLines="Vertical">
             <AlternatingRowStyle BackColor="#DCDCDC" />
