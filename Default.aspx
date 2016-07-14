@@ -79,18 +79,6 @@
                 </td>
             </tr>
             <tr>
-                <td bgcolor="#99CCFF" class="style5">
-                    BPM結案日-起</td>
-                <td class="auto-style1">
-                    <asp:TextBox ID="txtBpmEndS" runat="server" TabIndex="3"></asp:TextBox>
-                </td>
-                <td bgcolor="#99CCFF" class="style3">
-                    BPM結案日-訖</td>
-                <td class="auto-style6">
-                    <asp:TextBox ID="txtBpmEndE" runat="server" TabIndex="4"></asp:TextBox>
-                </td>
-            </tr>            
-            <tr>
                 <td bgcolor="#3399FF" class="style5">
                     BPM單號</td>
                 <td class="auto-style1">
@@ -236,6 +224,18 @@
         <asp:HyperLink ID="hlBack" runat="server" NavigateUrl="/bpm/">回BPM報表畫面</asp:HyperLink>
         <br />
         <br />
+        <asp:GridView ID="gvDebug" runat="server" BackColor="White" BorderColor="#999999" BorderStyle="None" BorderWidth="1px" CellPadding="3" GridLines="Vertical">
+            <AlternatingRowStyle BackColor="#DCDCDC" />
+            <FooterStyle BackColor="#CCCCCC" ForeColor="Black" />
+            <HeaderStyle BackColor="#000084" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#999999" ForeColor="Black" HorizontalAlign="Center" />
+            <RowStyle BackColor="#EEEEEE" ForeColor="Black" />
+            <SelectedRowStyle BackColor="#008A8C" Font-Bold="True" ForeColor="White" />
+            <SortedAscendingCellStyle BackColor="#F1F1F1" />
+            <SortedAscendingHeaderStyle BackColor="#0000A9" />
+            <SortedDescendingCellStyle BackColor="#CAC9C9" />
+            <SortedDescendingHeaderStyle BackColor="#000065" />
+        </asp:GridView>
     </form>
 </body>
 </html>

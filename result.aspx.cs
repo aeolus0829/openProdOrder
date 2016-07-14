@@ -15,110 +15,17 @@ public partial class result : System.Web.UI.Page
     public string dateFltr { get; set; }
     public string fltr { get; set; }
     public string lastYear { get; set; }
-    public List<string> vwCond { get; set; }
-    public List<string> tbCond { get; set; }
-
     protected void Page_Load(object sender, EventArgs e)
     {
         btnToExcel.Visible = true;
         hlQry0.Visible = true;
 
-        string today = DateTime.Today.ToShortDateString(); 
-
-        DateTime firstDayOM = cp.firstDayOfMonth();
-        DateTime lastDayOM = cp.lastDayOfMonth();
-        vwCond = (List<string>)Session["vwCond"];
-        tbCond = (List<string>)Session["tbCond"];
-
-        /*
-        dateFltr = Session["dateFltr"].ToString();
-
-        if (Session["ftr"] == null) fltr = "";
-        else fltr = Session["ftr"].ToString();
-
-        if (Session["recent"] == null) lastYear = "";
-        else lastYear = Session["recent"].ToString();
-        */
-
-        string strSQL = @"
-            select DOC_NBR as 'BPM單號',
-            convert(varchar,BEGIN_TIME,111) as 'BPM起單日',
-            convert(varchar,BEGIN_TIME,108) as 'BPM起單時',
-            convert(varchar,END_TIME,111) as 'BPM結單日',
-            convert(varchar,END_TIME,108) as 'BPM結單時',
-            fromDOC as '來源單號', 
-            mtrlDOC as '物料文件',
-            case 
-                task_status 
-                    when '1' then '未簽' 
-                    when '2' then '結案' 
-                    when '4' then '退簽'
-            end as '簽核狀態', 
-            SUB_FLOW_NAME AS '站點',
-            QAresult AS '檢驗結果',
-            RDpersen AS '樣品負責人', 
-            excpMIt as 特採狀態, 
-            MOVE_TYPE as '異動類型', 
-            PO as '採購單號', 
-            POITEM as '採購項次', 
-            VENDOR_NAME as '供應商',
-            MATERIAL as '物料號碼',
-            ORDERID as '工單號碼',
-            ORD_MATERIAL as '工單料號',
-            SHORT_TEXT as '短文',
-            ENTRY_QNT as '收貨數',
-            case 
-                PO_UNIT 
-                    when 'ST' then 'PC' 
-            end as '單位' from";
-
-        string todaySql = procSQLstring(strSQL, "today");
-        string oldSql = procSQLstring(strSQL, "old");
-
-        DataTable dt = tp.combineDt(todaySql, oldSql);
-
-        bindGv(dt);
-    }
-
-    private string procSQLstring(string stringSql, string queryOption)
-    {
-
-        SqlCommand cmd = new SqlCommand();
-        if (queryOption == "today")
-        {
-            stringSql += " VW_ICM_Item{0}{1}";
-            /*
-            stringSql += " VW_ICM_Item where (1=1)";
-            stringSql += dateFltr;
-            stringSql += fltr;
-            */
-        }
-        else
-        {
-            stringSql += " TB_ICM_Item{0}{1}";
-            /*
-            stringSql += " TB_ICM_Item where (1=1)";            
-            stringSql += fltr;
-            stringSql += lastYear;
-            */
-        }
-        cmd.CommandText = string.Format(
-            stringSql,
-            vwCond.Count > 0 ? " WHERE " : "",
-            string.Join(" AND ", vwCond.ToArray())
-            );
-
-
-        //stringSql += " AND ENTRY_QNT<>0";
-        // Session["sql"] = strSQL;
-
-        return cmd.CommandText;
+        //bindGv(dt);
     }
 
     private void bindGv(DataTable dt)
     {
         DataSet ds = new DataSet();
-        //DataTable dt = new DataTable();
 
         try
         {
@@ -128,8 +35,8 @@ public partial class result : System.Web.UI.Page
                 hlQry0.Visible = false;
             }
             else {
-                ds.Tables.Add(dt);
-                gvList.DataSource = ds;                
+                //ds.Tables.Add(dt);
+                gvList.DataSource = dt;
                 gvList.DataBind();
             }
             //lblDataCnt.Text = sql;               

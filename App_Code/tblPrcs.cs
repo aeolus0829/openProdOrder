@@ -17,235 +17,35 @@ namespace nsTblPrcs
     {
         // public string connectionString = "Data Source=192.168.0.16;Initial Catalog=jw_dbfdb;Uid=jw;Pwd=jw;";
         //public string connectionString = "Data Source=192.168.0.16;Initial Catalog=PRD;User ID=archer;Password=ko123vr4";
-        public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF_DEV;User ID=SA;Password=Jinud-98A";
+        public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF;User ID=SA;Password=Jinud-98A";
 
         public bool result = false;
 
-        public DataTable mkTbl(DataTable dt,string[] dtClmnHdrs, ArrayList dataRslts)
-        {       
-            //DataTable dt = new DataTable(); 
-            //ArrayList finalTbl = new ArrayList();
-            
-            string[] dataRsltRows= null ;
-            
-            for (int i = 0; i < dtClmnHdrs.Count(); i++)
-            { 
-                dt.Columns.Add(dtClmnHdrs[i]);
-            }
-
-            foreach (string dataRslt in dataRslts)
-            {
-                dataRsltRows = dataRslt.Split(',');
-
-                DataRow row = dt.NewRow();
-                for (int i = 0; i < dataRsltRows.Count(); i++)
-                {
-                    row[dtClmnHdrs[i]] = dataRsltRows[i];
-                }            
-                dt.Rows.Add(row);
-            }
-            return dt;
-        }
-
-        public void crtTbl(string tblNm)
-        {
-            string sql = null;
-            switch (tblNm)
-            {
-                case "tmpOrdr":
-                    sql = "create table tmpOrdr(ordrNbr char(20),itmNbr char(20),cusAlias char(20),ordrQty char(20),plnDt date, status char(20))";
-                break;
-                case "tmpBom":
-                    sql = "create table tmpBom(ordrNbr char(20),itmNbr char(20),itmNm char(30),unitNm char(10),useQty char(10),qty char(20))";
-                break; 
-                case "tmpNtInQty":
-                    sql = "create table tmpNtInQty(ordrNbr char(20),itmNbr char(20),purNtIn char(20),subNtIn char(20))";
-                break;
-                case "tmpStkQty":
-                    sql = "create table tmpStkQty (ordrNbr char(20),itmNbr char(20),stkQty char(20))";
-                break;
-                    /*
-                case "tmpShrtQty":
-                    sql = "create table tmpShrtQty (itmNbr char(20),stkQty char(20))";
-                break;
-                     */
-            }
-            result = execSql(sql);
-            //alertMsg(result,tblNm+" 資料表建立");
-        }
-
-        public void drpTbl(string tblNm)
-        {
-            string sql = "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + tblNm + "' AND TABLE_SCHEMA = 'dbo') BEGIN DROP TABLE dbo." + tblNm + " END";
-            result = execSql(sql);
-            //alertMsg(result, tblNm+" 資料表刪除");
-        }
-
-        public void trnctTbl(string tblNm)
-        {
-            string sql = "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + tblNm + "' AND TABLE_SCHEMA = 'dbo') BEGIN truncate TABLE dbo." + tblNm + " END";
-            result = execSql(sql);
-            //alertMsg(result, tblNm+" 資料表清空");
-        }
-
-        public string insrtData(string tblNm, ArrayList aryDatas,string ordrNbr)
-        {
-            string[] rowData = null;
-            string sql = null;
-
-            foreach (string aryData in aryDatas)
-            {                
-                if (tblNm=="tmpBom") sql += "insert into " + tblNm.Trim() + " values('"+ordrNbr+"','";
-                else sql += "insert into " + tblNm.Trim() + " values('";                
-                
-                rowData = aryData.ToString().Split(',');
-                for (int i = 0; i < rowData.Count(); i++)
-                {
-                    if (i<(rowData.Count()-1)) sql+=rowData[i]+"','";                    
-                    else sql += rowData[i] + "');";
-                }
-                //execSql(sql);
-            }            
-            //alertMsg(result,tblNm + " 資料新增");
-            return sql;
-        }
-
-        public string updtData(string tblNm, ArrayList aryDatas, Array aryHdrs)
-        {
-            string[] rowData = null;
-            string[] hdrData = null;
-            string sql = null;
-
-            foreach (string aryData in aryDatas)
-            {
-                sql += "update " + tblNm.Trim() + " set ";
-
-                rowData = aryData.ToString().Split(',');
-                hdrData = aryHdrs.ToString().Split(',');
-
-                for (int i = 0; i < rowData.Count(); i++)
-                {
-                    if (i < (rowData.Count() - 1)) sql += hdrData[i]+"='"+rowData[i] + "',";
-                    else sql += rowData[i] + "';";
-                }
-            }
-            //alertMsg(result,tblNm + " 資料新增");
-            return sql;
-        }
-
-        public bool execSql(string strSQL)
+        public DataTable getIncomingMaterial(SqlCommand comm)
         {
             SqlConnection conn;
-            SqlCommand comm;            
-            ArrayList results = new ArrayList();
-            bool result = false;
-            int affectRows = 0;
-
-            conn = new SqlConnection(connectionString);
-            comm = new SqlCommand(strSQL, conn);
-            try
-            {                
-                conn.Open();
-                affectRows = comm.ExecuteNonQuery();
-                
-            }
-            catch (Exception ex)
-            {
-                HttpContext.Current.Response.Write(ex + " 錯誤<br/>");
-                HttpContext.Current.Response.Write("<ul><li>請回前一頁檢查輸入條件有沒有問題</li>");
-                HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
-                //Response.Write(strSQL + "<br/>");
-            }
-            finally
-            {
-                conn.Close();
-            }
-            if ((affectRows == -1 ) || (affectRows>0)) result = true;
-            else result = false;
-            return result;
-        }
-
-        public DataTable qrySql(string strSQL)
-        {
-            SqlConnection conn;
-            SqlCommand comm;
-            //SqlDataReader rdr=null;
-
-            //DataTable dt = new DataTable();            
-            DataSet ds = new DataSet();
+            SqlDataReader dr;
             DataTable dt = new DataTable();
 
             conn = new SqlConnection(connectionString);
-            comm = new SqlCommand(strSQL, conn);
-
+            comm.Connection = conn;
             try
             {
                 conn.Open();
-                SqlDataAdapter da = new SqlDataAdapter(comm);
-                da.Fill(dt);
-                da.Dispose();
+                dr = comm.ExecuteReader();
+                if (dr.HasRows) dt.Load(dr);
             }
             catch (Exception ex)
             {
-                HttpContext.Current.Response.Write(ex + " 錯誤<br/>");
-                HttpContext.Current.Response.Write("<ul><li>請回前一頁檢查輸入條件有沒有問題</li>");
-                HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
-                //Response.Write(strSQL + "<br/>");
+                HttpContext.Current.Response.Write("getIncomingMaterial() error. 查詢的資料在取回時出了問題");
+                /* debug
+                HttpContext.Current.Response.Write(comm.CommandText);
+                HttpContext.Current.Response.Write("<br />");
+                HttpContext.Current.Response.Write(ex);
+                */
             }
             finally
             {
-                comm.Dispose();
-                conn.Close();
-            }
-            return dt;
-        }
-
-        public DataTable combineDt(string today, string old)
-        {
-            SqlConnection conn;
-            SqlCommand commToday, commOld;
-            DataTable dtToday = new DataTable();
-            DataTable dtOld = new DataTable();
-            DataTable dt = new DataTable();
-
-            conn = new SqlConnection(connectionString);
-            commToday = new SqlCommand(today, conn);
-            commOld = new SqlCommand(old, conn);
-
-            /*
-             * 
-            if (dtToday.Rows.Count > 0) dt.Merge(dtToday);
-            if (dtOld.Rows.Count > 0) dt.Merge(dtOld);
-            */
-
-            try
-            {
-                conn.Open();
-                SqlDataAdapter daToday = new SqlDataAdapter(commToday);
-                SqlDataAdapter daOld = new SqlDataAdapter(commOld);
-
-                daToday.Fill(dtToday);daToday.Dispose();
-                daOld.Fill(dtOld);daOld.Dispose();
-
-                if (dtToday.Rows.Count > 0) dt.Merge(dtToday);
-                if (dtOld.Rows.Count > 0) dt.Merge(dtOld);
-            }
-            catch (Exception ex)
-            {
-                //HttpContext.Current.Response.Write(ex + " combineDt() 錯誤<br/>");
-                HttpContext.Current.Response.Write("combineDt() 錯誤<br/>");
-                HttpContext.Current.Response.Write(today + "<br/>");
-                HttpContext.Current.Response.Write(old + "<br/>");
-                HttpContext.Current.Response.Write("<ul><li>請回前一頁檢查輸入條件有沒有問題</li>");
-                HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
-                //Response.Write(strSQL + "<br/>");
-            }
-            finally
-            {
-                commToday.Dispose();
-                commOld.Dispose();
-                dtToday.Dispose();
-                dtOld.Dispose();                
                 conn.Close();
             }
             return dt;
@@ -267,49 +67,6 @@ namespace nsTblPrcs
             page.Controls.Add(rslt);
         }
 
-        public ArrayList getAryLs(string strSQL)
-        {
-            SqlConnection conn;
-            SqlCommand comm;
-            SqlDataReader rdr;
-            string strRow = null;
-            ArrayList results = new ArrayList();
-
-            conn = new SqlConnection(connectionString);
-            comm = new SqlCommand(strSQL, conn);
-            try
-            {
-                conn.Open();
-                rdr = comm.ExecuteReader();
-                if (rdr.HasRows)
-                {
-                    while (rdr.Read())
-                    {
-                        for (int r = 0; r <= rdr.FieldCount; r++)
-                        {
-                            if (r < rdr.FieldCount - 1) strRow += rdr[r].ToString().Trim() + ",";
-                            if (r == rdr.FieldCount - 1) strRow += rdr[r].ToString().Trim();
-                        }
-                        if (string.IsNullOrEmpty(strRow)) strRow = "0";
-                        results.Add(strRow);
-                        strRow = null;
-                    }
-                    rdr.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                HttpContext.Current.Response.Write(ex + " 錯誤<br/>");
-                HttpContext.Current.Response.Write("<ul><li>請回前一頁檢查輸入條件有沒有問題</li>");
-                HttpContext.Current.Response.Write("<li>本頁請不要按[重新整理]</li>");
-                //Response.Write(strSQL + "<br/>");
-            }
-            finally
-            {
-                conn.Close();
-            }
-            return results;
-        }
 
     } //    public class tblPrcs
 }
