@@ -14,7 +14,7 @@ namespace nsCmnPrcs
     /// </summary>
     public class cmnPrcs
     {
-        public string convertToDatef(string str)
+        public string formatDateWithDash(string str)
         {
             string sY, sM, sD, sDate;
             sY = str.Substring(0, 4);

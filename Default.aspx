@@ -184,8 +184,7 @@
                 <td bgcolor="White" class="auto-style9">
                     </td>
                 <td class="auto-style10">
-                    <asp:CheckBox ID="cbRecent" runat="server" Checked="True" Text="資料範圍：到去年為止" />
-                    </td>
+                    &nbsp;</td>
             </tr>
             <tr>
                 <td class="style5">
@@ -223,8 +222,9 @@
 
         <asp:HyperLink ID="hlBack" runat="server" NavigateUrl="/bpm/">回BPM報表畫面</asp:HyperLink>
         <br />
+        <asp:Button ID="btnToExcel" runat="server" OnClick="btnToExcel_Click" Text="to Excel" />
         <br />
-        <asp:GridView ID="gvDebug" runat="server" BackColor="White" BorderColor="#999999" BorderStyle="None" BorderWidth="1px" CellPadding="3" GridLines="Vertical">
+        <asp:GridView ID="gvResult" runat="server" BackColor="White" BorderColor="#999999" BorderStyle="None" BorderWidth="1px" CellPadding="3" GridLines="Vertical">
             <AlternatingRowStyle BackColor="#DCDCDC" />
             <FooterStyle BackColor="#CCCCCC" ForeColor="Black" />
             <HeaderStyle BackColor="#000084" Font-Bold="True" ForeColor="White" />

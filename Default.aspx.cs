@@ -9,22 +9,64 @@ public partial class _Default : System.Web.UI.Page
 {
     tblPrcs tp = new tblPrcs();
     cmnPrcs cp = new cmnPrcs();
+
     bool isFormEnabled = true;
-    public string strSQL { get; set; }
-    public List<string> vwCond { get; set; }
-    public List<string> tbCond { get; set; }
-
-
+    string strSQL, beginS, beginE, today, yesterday, thisyear, lastyear, dayBefore3Month, todaySql, oldSql;
+    SqlCommand tbCmd, vwCmd;                                                             
+    List<string> vwCond, tbCond;
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        today = DateTime.Today.ToShortDateString();
+        yesterday = DateTime.Today.AddDays(-1).ToShortDateString();
+        thisyear = today.Substring(0, 4);
+        lastyear = Convert.ToString(Convert.ToInt16(thisyear) - 1);
+        dayBefore3Month = DateTime.Now.AddMonths(-3).ToShortDateString();
+
         if (! isFormEnabled)
         {
             Response.Redirect("disabled.html");
         }
         else {
             if (!IsPostBack) clrBtn();
-        }
+        }        
+    }
+
+    protected void btnClr_Click(object sender, EventArgs e)
+    {
+        clrBtn();
+    }
+    protected void clrBtn()
+    {
+        txtBpmBeginS.Text="";
+        txtBpmBeginE.Text = "";
+        txtBpmNo.Text="";
+        txtBpmPo.Text="";
+        txtMatnr.Text="";
+        txtVndrNm.Text = "";
+        ddlQA.SelectedIndex = 0;
+        rdblQA.SelectedIndex = 0;
+        ddlMvt.SelectedIndex = 0;
+        Session.Abandon();
+    }
+    protected void btnSubmt_Click(object sender, EventArgs e)
+    {
+        DataTable tbDt = buildSqlWithCondition();
+
+        tbDt.DefaultView.Sort = "BPM單號 ASC";
+
+        gvResult.DataSource = tbDt;
+        gvResult.DataBind();
+
+        //Response.Redirect("result.aspx");
+    }
+
+    private DataTable buildSqlWithCondition()
+    {
+        tbCmd = new SqlCommand();
+        vwCmd = new SqlCommand();
+        List<string> vwCond = new List<string>();
+        List<string> tbCond = new List<string>();
 
         strSQL = @"
             select DOC_NBR as 'BPM單號',
@@ -57,73 +99,25 @@ public partial class _Default : System.Web.UI.Page
                 PO_UNIT 
                     when 'ST' then 'PC' 
             end as '單位' from";
-    }
 
-    protected void btnClr_Click(object sender, EventArgs e)
-    {
-        clrBtn();
-    }
-    protected void clrBtn()
-    {
-        txtBpmBeginS.Text="";
-        txtBpmBeginE.Text = "";
-        txtBpmNo.Text="";
-        txtBpmPo.Text="";
-        txtMatnr.Text="";
-        txtVndrNm.Text = "";
-        ddlQA.SelectedIndex = 0;
-        rdblQA.SelectedIndex = 0;
-        ddlMvt.SelectedIndex = 0;
-        Session.Abandon();
-    }
-    protected void btnSubmt_Click(object sender, EventArgs e)
-    {
-        string today = DateTime.Today.ToShortDateString();
-        string yesterday = DateTime.Today.AddDays(-1).ToShortDateString();
-        string thisyear = today.Substring(0, 4);
-        string beginS, beginE, endS, endE;
-        string lastyear = Convert.ToString(Convert.ToInt16(thisyear) - 1);
-
-        SqlCommand tbCmd = new SqlCommand();
-        SqlCommand vwCmd = new SqlCommand();
-
-        SqlCommand vwCmd1 = new SqlCommand();
-
-        List<string> vwCond = new List<string>();
-        List<string> tbCond = new List<string>();
-
-        /*
-        string todaySql1 = strSQL + " VW_ICM_Item WHERE BEGIN_TIME >= '2016/7/13 00:00' AND BEGIN_TIME <= '2016/7/13 23:59'";
-        vwCmd1.CommandText = todaySql1;
-
-        SqlConnection conn = new SqlConnection(tp.connectionString);
-        SqlDataReader dr;
-        vwCmd1.Connection = conn;
-        conn.Open();
-        dr = vwCmd1.ExecuteReader();
-        gvDebug.DataSource = dr;
-        gvDebug.DataBind();
-        */
-
-        beginS = procDateTimeFormat(txtBpmBeginS.Text, " 00:00");
-        if (txtBpmBeginE.Text=="") beginE = procDateTimeFormat(txtBpmBeginS.Text, " 23:59");
-        else beginE = procDateTimeFormat(txtBpmBeginE.Text, " 23:59");
+        beginS = bindDayTime(txtBpmBeginS.Text, " 00:00");
+        if (txtBpmBeginE.Text == "") beginE = bindDayTime(txtBpmBeginS.Text, " 23:59");
+        else beginE = bindDayTime(txtBpmBeginE.Text, " 23:59");
 
         vwCond.Add("BEGIN_TIME >= @vwbgTimeStart");
         vwCmd.Parameters.AddWithValue("vwBgTimeStart", today + " 00:00");
         vwCond.Add("BEGIN_TIME <= @vwbgTimeEnd");
         vwCmd.Parameters.AddWithValue("vwBgTimeEnd", today + " 23:59");
 
-        if (! string.IsNullOrEmpty(beginS))
-        {            
+        if (!string.IsNullOrEmpty(beginS))
+        {
             tbCond.Add("BEGIN_TIME>=@tbBgTimeStart");
-            tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value=beginS;
+            tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value = beginS;
         }
         else
         {
-            string thisYearBegin = thisyear + "/06/01 00:00";
             tbCond.Add("BEGIN_TIME>=@tbBgTimeStart");
-            tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value = thisYearBegin;
+            tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value = dayBefore3Month + " 00:00";
         }
 
         if (!string.IsNullOrEmpty(beginE))
@@ -138,15 +132,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@tbBgTimeEnd", SqlDbType.VarChar).Value = yesterdayEnd;
         }
 
-        if (! string.IsNullOrEmpty(endS))
-        {
-            tbCond.Add("END_TIME>=@edTimeStart");
-            tbCmd.Parameters.Add("@edTimeStart", SqlDbType.VarChar).Value = endS;
-            tbCond.Add("END_TIME<=@edTimeEnd");
-            tbCmd.Parameters.Add("@edTimeEnd", SqlDbType.VarChar).Value = endE;
-        }
-
-        if (txtBpmNo.Text!= "")
+        if (txtBpmNo.Text != "")
         {
             vwCond.Add("DOC_NBR LIKE '%@docNbr%'");
             vwCmd.Parameters.Add("@docNbr", SqlDbType.VarChar).Value = txtBpmNo.Text.Trim();
@@ -154,7 +140,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@docNbr", SqlDbType.VarChar).Value = txtBpmNo.Text.Trim();
         }
 
-        if (txtBpmPo.Text!= "")
+        if (txtBpmPo.Text != "")
         {
             vwCond.Add("PO LIKE '%@poNum%'");
             vwCmd.Parameters.Add("@poNum", SqlDbType.VarChar).Value = txtBpmPo.Text.Trim();
@@ -162,7 +148,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@poNum", SqlDbType.VarChar).Value = txtBpmPo.Text.Trim();
         }
 
-        if (txtMtrlDocNbr.Text!= "")
+        if (txtMtrlDocNbr.Text != "")
         {
             vwCond.Add("MTRLDOC LIKE '%@mtrlDoc%'");
             vwCmd.Parameters.Add("@mtrlDoc", SqlDbType.VarChar).Value = txtMtrlDocNbr.Text.Trim();
@@ -170,7 +156,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@mtrlDoc", SqlDbType.VarChar).Value = txtMtrlDocNbr.Text.Trim();
         }
 
-        if (txtOrdMtrl.Text!= "")
+        if (txtOrdMtrl.Text != "")
         {
             vwCond.Add("MTRLDOC LIKE '%@ordMtrl%'");
             vwCmd.Parameters.Add("@ordMtrl", SqlDbType.VarChar).Value = txtOrdMtrl.Text.Trim();
@@ -178,7 +164,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@ordMtrl", SqlDbType.VarChar).Value = txtOrdMtrl.Text.Trim();
         }
 
-        if (txtMatnr.Text!= "")
+        if (txtMatnr.Text != "")
         {
             vwCond.Add("MATERIAL LIKE '%@matnr%'");
             vwCmd.Parameters.Add("@matnr", SqlDbType.VarChar).Value = txtMatnr.Text.Trim();
@@ -186,7 +172,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@matnr", SqlDbType.VarChar).Value = txtMatnr.Text.Trim();
         }
 
-        if (txtVndrNm.Text!= "")
+        if (txtVndrNm.Text != "")
         {
             vwCond.Add("VENDOR_NAME LIKE '%@vendorNm%'");
             vwCmd.Parameters.Add("@vendorNm", SqlDbType.VarChar).Value = txtVndrNm.Text.Trim();
@@ -194,7 +180,7 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@vendorNm", SqlDbType.VarChar).Value = txtVndrNm.Text.Trim();
         }
 
-        if (ddlMvt.SelectedIndex!=0)
+        if (ddlMvt.SelectedIndex != 0)
         {
             vwCond.Add("MOVE_TYPE LIKE '%@mvT%'");
             vwCmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
@@ -202,13 +188,12 @@ public partial class _Default : System.Web.UI.Page
             tbCmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
         }
 
-        if (rdblQA.SelectedIndex!=0)
+        if (rdblQA.SelectedIndex != 0)
         {
             vwCond.Add("QAresult LIKE '%@QAResult%'");
             vwCmd.Parameters.Add("@QAResult", SqlDbType.VarChar).Value = rdblQA.SelectedValue;
             tbCond.Add("QAresult LIKE '%@QAResult%'");
             tbCmd.Parameters.Add("@QAResult", SqlDbType.VarChar).Value = rdblQA.SelectedValue;
-
         }
 
         if (rbSample.SelectedValue == "Y")
@@ -217,32 +202,27 @@ public partial class _Default : System.Web.UI.Page
             tbCond.Add("RDpersen <> ''");
         }
 
-        if (ddlQA.SelectedIndex!=0)
+        if (ddlQA.SelectedIndex != 0)
         {
             vwCond.Add(ddlQA.SelectedValue);
             tbCond.Add(ddlQA.SelectedValue);
         }
 
-        string todaySql = strSQL + " VW_ICM_Item{0}{1}";
-        string oldSql = strSQL + " TB_ICM_Item{0}{1}";
+        todaySql = strSQL + " VW_ICM_Item{0}{1}";
+        oldSql = strSQL + " TB_ICM_Item{0}{1}";
 
-        vwCmd.CommandText = procSql(todaySql, vwCond);
-        tbCmd.CommandText = procSql(oldSql, tbCond);
+        vwCmd.CommandText = bindContition(todaySql, vwCond);
+        tbCmd.CommandText = bindContition(oldSql, tbCond);
 
         DataTable vwDt = tp.getIncomingMaterial(vwCmd);
         DataTable tbDt = tp.getIncomingMaterial(tbCmd);
 
-        tbDt.Merge(vwDt,true);
+        tbDt.Merge(vwDt);
 
-        tbDt.DefaultView.Sort = "BPM單號 ASC";
-
-        gvDebug.DataSource = tbDt;
-        gvDebug.DataBind();
-
-        //Response.Redirect("result.aspx");
+        return tbDt;
     }
 
-    private string procSql(string stringSql, List<string> vwCond)
+    private string bindContition(string stringSql, List<string> vwCond)
     {
         string sql = string.Format(
             stringSql,
@@ -253,11 +233,11 @@ public partial class _Default : System.Web.UI.Page
 
     }
 
-    private string procDateTimeFormat(string strDate, string strTime)
+    private string bindDayTime(string strDate, string strTime)
     {
         if (!string.IsNullOrEmpty(strDate))
         {
-            strDate = cp.convertToDatef(strDate.Trim());
+            strDate = cp.formatDateWithDash(strDate.Trim());
             strDate += strTime;
         }
         else
@@ -275,13 +255,13 @@ public partial class _Default : System.Web.UI.Page
     {
         
     }
-    protected void btnToExcel_Click(object sender, EventArgs e)
-    {
-        
-    }
     protected void rdblQA_SelectedIndexChanged(object sender, EventArgs e)
     {
 
     }
-
+    
+    protected void btnToExcel_Click(object sender, EventArgs e)
+    {
+        cp.ExportToExcel(gvResult);
+    }
 }
