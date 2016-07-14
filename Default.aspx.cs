@@ -11,9 +11,10 @@ public partial class _Default : System.Web.UI.Page
     cmnPrcs cp = new cmnPrcs();
 
     bool isFormEnabled = true;
-    string strSQL, beginS, beginE, today, yesterday, thisyear, lastyear, dayBefore3Month, todaySql, oldSql;
+    string strSQL, beginS, beginE, today, yesterday, thisyear, lastyear, dayBefore3Month, todaySql, oldSql, inputDate;
     SqlCommand tbCmd, vwCmd;                                                             
     List<string> vwCond, tbCond;
+    System.Diagnostics.Stopwatch sw;
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -22,6 +23,8 @@ public partial class _Default : System.Web.UI.Page
         thisyear = today.Substring(0, 4);
         lastyear = Convert.ToString(Convert.ToInt16(thisyear) - 1);
         dayBefore3Month = DateTime.Now.AddMonths(-3).ToShortDateString();
+
+        sw = new System.Diagnostics.Stopwatch();
 
         if (! isFormEnabled)
         {
@@ -34,7 +37,7 @@ public partial class _Default : System.Web.UI.Page
 
     protected void btnClr_Click(object sender, EventArgs e)
     {
-        clrBtn();
+        clrBtn();        
     }
     protected void clrBtn()
     {
@@ -44,41 +47,52 @@ public partial class _Default : System.Web.UI.Page
         txtBpmPo.Text="";
         txtMatnr.Text="";
         txtVndrNm.Text = "";
+        btnToExcel.Visible = false;
         ddlQA.SelectedIndex = 0;
         rdblQA.SelectedIndex = 0;
         ddlMvt.SelectedIndex = 0;
+        gvResult.Dispose();
+        gvResult.Visible = false;
         Session.Abandon();
     }
     protected void btnSubmt_Click(object sender, EventArgs e)
     {
-        DataTable tbDt = buildSqlWithCondition();
+        Trace.Write("before buildSqlWithCondition()");
+        DataTable dtReslt = geneDtWithSqlCondition();
+        Trace.Write("end of buildSqlWithCondition()");
 
         try
         {
-            if (tbDt != null)
+            if (dtReslt != null)
             {
                 btnToExcel.Visible = true;
+                gvResult.Visible = true;
 
-                tbDt.DefaultView.Sort = "BPM單號 ASC";
+                dtReslt.DefaultView.Sort = "BPM單號 ASC";
 
-                gvResult.DataSource = tbDt;
+                gvResult.DataSource = dtReslt;
+                Trace.Write("before gv bind");
                 gvResult.DataBind();
+                Trace.Write("end of gv bind");
             }
+            else Response.Write("依條件查詢，無任何資料");
         }
         catch (Exception)
         {
-            Response.Write("依條件查詢，無任何資料");
+            Response.Write("依條件查詢出現錯誤");
         }
 
         //Response.Redirect("result.aspx");
     }
 
-    private DataTable buildSqlWithCondition()
+    private DataTable geneDtWithSqlCondition()
     {
         tbCmd = new SqlCommand();
         vwCmd = new SqlCommand();
         List<string> vwCond = new List<string>();
         List<string> tbCond = new List<string>();
+        DataTable dtMain = new DataTable();
+        DataTable vwDt = new DataTable();
 
         strSQL = @"
             select DOC_NBR as 'BPM單號',
@@ -113,6 +127,9 @@ public partial class _Default : System.Web.UI.Page
             end as '單位' from";
 
         beginS = bindDayTime(txtBpmBeginS.Text, " 00:00");
+
+        if (!string.IsNullOrEmpty(beginS)) inputDate = cp.formatDateWithDash(txtBpmBeginS.Text);
+
         if (txtBpmBeginE.Text == "") beginE = bindDayTime(txtBpmBeginS.Text, " 23:59");
         else beginE = bindDayTime(txtBpmBeginE.Text, " 23:59");
 
@@ -120,6 +137,7 @@ public partial class _Default : System.Web.UI.Page
         vwCmd.Parameters.AddWithValue("vwBgTimeStart", today + " 00:00");
         vwCond.Add("BEGIN_TIME <= @vwbgTimeEnd");
         vwCmd.Parameters.AddWithValue("vwBgTimeEnd", today + " 23:59");
+
 
         if (!string.IsNullOrEmpty(beginS))
         {
@@ -226,12 +244,19 @@ public partial class _Default : System.Web.UI.Page
         vwCmd.CommandText = bindContition(todaySql, vwCond);
         tbCmd.CommandText = bindContition(oldSql, tbCond);
 
-        DataTable vwDt = tp.getIncomingMaterial(vwCmd);
-        DataTable tbDt = tp.getIncomingMaterial(tbCmd);
+        if (today == inputDate)
+        {
+            dtMain = tp.getIncomingMaterial(vwCmd);
+        }
+        else
+        {
+            vwDt = tp.getIncomingMaterial(vwCmd);
+            dtMain = tp.getIncomingMaterial(tbCmd);
 
-        tbDt.Merge(vwDt);
+            dtMain.Merge(vwDt);
+        }
 
-        return tbDt;
+        return dtMain;
     }
 
     private string bindContition(string stringSql, List<string> vwCond)
