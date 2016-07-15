@@ -57,9 +57,7 @@ public partial class _Default : System.Web.UI.Page
     }
     protected void btnSubmt_Click(object sender, EventArgs e)
     {
-        Trace.Write("before buildSqlWithCondition()");
         DataTable dtReslt = geneDtWithSqlCondition();
-        Trace.Write("end of buildSqlWithCondition()");
 
         try
         {
@@ -71,9 +69,7 @@ public partial class _Default : System.Web.UI.Page
                 dtReslt.DefaultView.Sort = "BPM單號 ASC";
 
                 gvResult.DataSource = dtReslt;
-                Trace.Write("before gv bind");
                 gvResult.DataBind();
-                Trace.Write("end of gv bind");
             }
             else Response.Write("依條件查詢，無任何資料");
         }
