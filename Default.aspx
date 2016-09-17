@@ -169,8 +169,7 @@
                 <td bgcolor="White" class="auto-style4">
                     </td>
                 <td class="auto-style5">
-                    <asp:CheckBox ID="cbNewest" runat="server" Text="只查最新資料 (速度較慢)" />
-                </td>
+                    &nbsp;</td>
             </tr>
             <tr>
                 <td bgcolor="#99CCFF" class="auto-style7">
@@ -183,9 +182,13 @@
                     </asp:RadioButtonList>
                 </td>
                 <td bgcolor="White" class="auto-style9">
-                    </td>
+                    輸出樣式</td>
                 <td class="auto-style10">
-                    &nbsp;</td>
+                    <asp:RadioButtonList ID="rblStyle" runat="server">
+                        <asp:ListItem Selected="True" Value="0">無樣式</asp:ListItem>
+                        <asp:ListItem Value="1">印表用</asp:ListItem>
+                    </asp:RadioButtonList>
+                </td>
             </tr>
             <tr>
                 <td class="style5">
@@ -195,7 +198,8 @@
                 <td class="style3">
                     &nbsp;</td>
                 <td class="auto-style6">
-                    &nbsp;</td>
+                    <asp:CheckBox ID="cbNewest" runat="server" Text="只查最新資料 (速度較慢)" />
+                </td>
             </tr>
             <tr>
                 <td class="style5">
@@ -215,10 +219,10 @@
     
     </div>
         <ul>
-            <li>BPM文件日期 2014/7/11後才有檢驗結果及特採狀態可查詢</li>
-            <li>若未輸入任何條件，只會顯示最近三個月的資料</li>
+            <li>欄位標示為 % 表示輸入部份資料即可</li>
+            <li>未輸入任何條件，只會顯示最近三個月的資料</li>
             <li>日期若起訖為同一天，輸入起始日期就好，格式 20131231</li>
-            <li>欄位標示為 % 表示輸入部份資料即可</li>            
+            <li>BPM文件日期 2014/7/11後才有檢驗結果及特採狀態可查詢</li>
         </ul>
 
         <asp:HyperLink ID="hlBack" runat="server" NavigateUrl="/bpm/">回BPM報表畫面</asp:HyperLink>

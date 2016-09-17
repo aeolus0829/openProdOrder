@@ -21,7 +21,7 @@ namespace nsTblPrcs
 
         public bool result = false;
 
-        public DataTable getIncomingMaterial(SqlCommand comm)
+        public DataTable getData(SqlCommand comm)
         {
             SqlConnection conn;
             SqlDataReader dr;
@@ -37,12 +37,11 @@ namespace nsTblPrcs
             }
             catch (Exception ex)
             {
-                HttpContext.Current.Response.Write("getIncomingMaterial() error. 查詢的資料在取回時出了問題");
-                /* debug
+                HttpContext.Current.Response.Write("getIncomingMaterial() error. 查詢的資料在取回時出了問題<br />");
                 HttpContext.Current.Response.Write(comm.CommandText);
                 HttpContext.Current.Response.Write("<br />");
                 HttpContext.Current.Response.Write(ex);
-                */
+                /* debug*/
             }
             finally
             {

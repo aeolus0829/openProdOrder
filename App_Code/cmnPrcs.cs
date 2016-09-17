@@ -5,7 +5,10 @@ using System.Web;
 using System.Web.UI.WebControls;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
-
+using ClosedXML;
+using ClosedXML.Excel;
+using System.IO;
+using System.Data;
 
 namespace nsCmnPrcs
 {
@@ -25,10 +28,10 @@ namespace nsCmnPrcs
         }
 
         public DateTime firstDayOfMonth()
-    {
-                DateTime FirstDay = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
-                return FirstDay;
-    }
+        {
+            DateTime FirstDay = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
+            return FirstDay;
+        }
 
         public DateTime lastDayOfMonth()
         {

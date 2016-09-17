@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data;
 
+
 public partial class _Default : System.Web.UI.Page
 {
     tblPrcs tp = new tblPrcs();
@@ -12,8 +13,9 @@ public partial class _Default : System.Web.UI.Page
 
     bool isFormEnabled = true;
     string strSQL, beginS, beginE, today, yesterday, thisyear, lastyear, dayBefore3Month, todaySql, oldSql, inputDate;
-    SqlCommand tbCmd, vwCmd;                                                             
-    List<string> vwCond, tbCond;
+    SqlCommand tbCmd, vwCmd, Cmd;                                                             
+    List<string> vwCond, tbCond, Cond;
+    DataTable dtXlsx;
     System.Diagnostics.Stopwatch sw;
 
     protected void Page_Load(object sender, EventArgs e)
@@ -41,6 +43,7 @@ public partial class _Default : System.Web.UI.Page
     }
     protected void clrBtn()
     {
+        
         txtBpmBeginS.Text="";
         txtBpmBeginE.Text = "";
         txtBpmNo.Text="";
@@ -54,6 +57,8 @@ public partial class _Default : System.Web.UI.Page
         gvResult.Dispose();
         gvResult.Visible = false;
         Session.Abandon();
+        
+        //Response.Redirect("Default.aspx");
     }
     protected void btnSubmt_Click(object sender, EventArgs e)
     {
@@ -61,7 +66,7 @@ public partial class _Default : System.Web.UI.Page
 
         try
         {
-            if (dtReslt != null)
+            if (dtReslt.Columns.Count>0)
             {
                 btnToExcel.Visible = true;
                 gvResult.Visible = true;
@@ -73,9 +78,9 @@ public partial class _Default : System.Web.UI.Page
             }
             else Response.Write("依條件查詢，無任何資料");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Response.Write("依條件查詢出現錯誤");
+            Response.Write("依條件查詢出現例外狀況 <p>" + ex);
         }
 
         //Response.Redirect("result.aspx");
@@ -85,9 +90,11 @@ public partial class _Default : System.Web.UI.Page
     {
         tbCmd = new SqlCommand();
         vwCmd = new SqlCommand();
-        List<string> vwCond = new List<string>();
-        List<string> tbCond = new List<string>();
-        DataTable dtMain = new DataTable();
+        Cmd = new SqlCommand();
+        //List<string> vwCond = new List<string>();
+        //List<string> tbCond = new List<string>();
+        List<string> Cond = new List<string>();
+        DataTable mainDt = new DataTable();
         DataTable vwDt = new DataTable();
 
         strSQL = @"
@@ -122,148 +129,165 @@ public partial class _Default : System.Web.UI.Page
                     when 'ST' then 'PC' 
             end as '單位' from";
 
-        beginS = bindDayTime(txtBpmBeginS.Text, " 00:00");
+        todaySql = strSQL + " VW_ICM_Item{0}{1}";
+        oldSql = strSQL + " TB_ICM_Item{0}{1}";
 
-        if (!string.IsNullOrEmpty(beginS)) inputDate = cp.formatDateWithDash(txtBpmBeginS.Text);
+        beginS = bindDayTime(txtBpmBeginS.Text, " 00:00");
 
         if (txtBpmBeginE.Text == "") beginE = bindDayTime(txtBpmBeginS.Text, " 23:59");
         else beginE = bindDayTime(txtBpmBeginE.Text, " 23:59");
 
-        vwCond.Add("BEGIN_TIME >= @vwbgTimeStart");
-        vwCmd.Parameters.AddWithValue("vwBgTimeStart", today + " 00:00");
-        vwCond.Add("BEGIN_TIME <= @vwbgTimeEnd");
-        vwCmd.Parameters.AddWithValue("vwBgTimeEnd", today + " 23:59");
-
-
-        if (!string.IsNullOrEmpty(beginS))
-        {
-            tbCond.Add("BEGIN_TIME>=@tbBgTimeStart");
-            tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value = beginS;
-        }
-        else
-        {
-            tbCond.Add("BEGIN_TIME>=@tbBgTimeStart");
-            tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value = dayBefore3Month + " 00:00";
-        }
-
-        if (!string.IsNullOrEmpty(beginE))
-        {
-            tbCond.Add("BEGIN_TIME<=@tbBgTimeEnd");
-            tbCmd.Parameters.Add("@tbBgTimeEnd", SqlDbType.VarChar).Value = beginE;
-        }
-        else
-        {
-            string yesterdayEnd = yesterday + " 23:59";
-            tbCond.Add("BEGIN_TIME<=@tbBgTimeEnd");
-            tbCmd.Parameters.Add("@tbBgTimeEnd", SqlDbType.VarChar).Value = yesterdayEnd;
-        }
+        // bool startDayContainToday = checkDateRange(beginS);
+        // bool endDayContainToday = checkDateRange(beginE);
 
         if (txtBpmNo.Text != "")
         {
-            vwCond.Add("DOC_NBR LIKE '%@docNbr%'");
-            vwCmd.Parameters.Add("@docNbr", SqlDbType.VarChar).Value = txtBpmNo.Text.Trim();
-            tbCond.Add("DOC_NBR LIKE '%@docNbr%'");
-            tbCmd.Parameters.Add("@docNbr", SqlDbType.VarChar).Value = txtBpmNo.Text.Trim();
+            Cond.Add("DOC_NBR LIKE '%' + @docNbr + '%'");
+            Cmd.Parameters.Add("@docNbr", SqlDbType.VarChar).Value = txtBpmNo.Text.Trim();
         }
 
         if (txtBpmPo.Text != "")
         {
-            vwCond.Add("PO LIKE '%@poNum%'");
-            vwCmd.Parameters.Add("@poNum", SqlDbType.VarChar).Value = txtBpmPo.Text.Trim();
-            tbCond.Add("PO LIKE '%@poNum%'");
-            tbCmd.Parameters.Add("@poNum", SqlDbType.VarChar).Value = txtBpmPo.Text.Trim();
+            Cond.Add("PO LIKE '%' + @poNum + '%'");
+            Cmd.Parameters.Add("@poNum", SqlDbType.VarChar).Value = txtBpmPo.Text.Trim();
         }
 
         if (txtMtrlDocNbr.Text != "")
         {
-            vwCond.Add("MTRLDOC LIKE '%@mtrlDoc%'");
-            vwCmd.Parameters.Add("@mtrlDoc", SqlDbType.VarChar).Value = txtMtrlDocNbr.Text.Trim();
-            tbCond.Add("MTRLDOC LIKE '%@mtrlDoc%'");
-            tbCmd.Parameters.Add("@mtrlDoc", SqlDbType.VarChar).Value = txtMtrlDocNbr.Text.Trim();
+            Cond.Add("MTRLDOC LIKE '%' + @mtrlDoc + '%'");
+            Cmd.Parameters.Add("@mtrlDoc", SqlDbType.VarChar).Value = txtMtrlDocNbr.Text.Trim();
         }
 
         if (txtOrdMtrl.Text != "")
         {
-            vwCond.Add("MTRLDOC LIKE '%@ordMtrl%'");
-            vwCmd.Parameters.Add("@ordMtrl", SqlDbType.VarChar).Value = txtOrdMtrl.Text.Trim();
-            tbCond.Add("MTRLDOC LIKE '%@ordMtrl%'");
-            tbCmd.Parameters.Add("@ordMtrl", SqlDbType.VarChar).Value = txtOrdMtrl.Text.Trim();
+            Cond.Add("ORD_MATERIAL LIKE '%' + @ordMtrl + '%'");
+            Cmd.Parameters.Add("@ordMtrl", SqlDbType.VarChar).Value = txtOrdMtrl.Text.Trim();
         }
 
         if (txtMatnr.Text != "")
         {
-            vwCond.Add("MATERIAL LIKE '%@matnr%'");
-            vwCmd.Parameters.Add("@matnr", SqlDbType.VarChar).Value = txtMatnr.Text.Trim();
-            tbCond.Add("MATERIAL LIKE '%@matnr%'");
-            tbCmd.Parameters.Add("@matnr", SqlDbType.VarChar).Value = txtMatnr.Text.Trim();
+            Cond.Add("MATERIAL LIKE '%' + @matnr + '%'");
+            Cmd.Parameters.Add("@matnr", SqlDbType.VarChar).Value = txtMatnr.Text.Trim();
         }
 
         if (txtVndrNm.Text != "")
         {
-            vwCond.Add("VENDOR_NAME LIKE '%@vendorNm%'");
-            vwCmd.Parameters.Add("@vendorNm", SqlDbType.VarChar).Value = txtVndrNm.Text.Trim();
-            tbCond.Add("VENDOR_NAME LIKE '%@vendorNm%'");
-            tbCmd.Parameters.Add("@vendorNm", SqlDbType.VarChar).Value = txtVndrNm.Text.Trim();
+            Cond.Add("VENDOR_NAME LIKE '%' + @vendorNm + '%'");
+            Cmd.Parameters.Add("@vendorNm", SqlDbType.VarChar).Value = txtVndrNm.Text.Trim();
         }
 
-        if (ddlMvt.SelectedIndex != 0)
+        switch (rblStyle.SelectedIndex)
         {
-            vwCond.Add("MOVE_TYPE LIKE '%@mvT%'");
-            vwCmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
-            tbCond.Add("MOVE_TYPE LIKE '%@mvT%'");
-            tbCmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
+            case 0:
+                if (ddlMvt.SelectedIndex != 0)
+                {
+                    Cond.Add("MOVE_TYPE LIKE '%' + @mvT + '%'");
+                    Cmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
+                }
+                break;
+            case 1: // 印表用樣式只需要這兩種異動類型
+                string mvt104 = "104";
+                string mvt105 = "105";
+                Cond.Add("MOVE_TYPE=' + @mvt104 + '");
+                Cmd.Parameters.Add("@mvt104", SqlDbType.VarChar).Value = mvt104;
+                Cond.Add("MOVE_TYPE=' + @mvt105 + '");
+                Cmd.Parameters.Add("@mvt105", SqlDbType.VarChar).Value = mvt105;
+                break;
         }
 
         if (rdblQA.SelectedIndex != 0)
         {
-            vwCond.Add("QAresult LIKE '%@QAResult%'");
-            vwCmd.Parameters.Add("@QAResult", SqlDbType.VarChar).Value = rdblQA.SelectedValue;
-            tbCond.Add("QAresult LIKE '%@QAResult%'");
-            tbCmd.Parameters.Add("@QAResult", SqlDbType.VarChar).Value = rdblQA.SelectedValue;
+            Cond.Add("QAresult LIKE '%' + @QAResult + '%'");
+            Cmd.Parameters.Add("@QAResult", SqlDbType.VarChar).Value = rdblQA.SelectedValue;
         }
 
         if (rbSample.SelectedValue == "Y")
         {
-            vwCond.Add("RDpersen <> ''");
-            tbCond.Add("RDpersen <> ''");
+            Cond.Add("RDpersen <> ''");
         }
 
         if (ddlQA.SelectedIndex != 0)
         {
-            vwCond.Add(ddlQA.SelectedValue);
-            tbCond.Add(ddlQA.SelectedValue);
+            Cond.Add(ddlQA.SelectedValue);
         }
 
-        todaySql = strSQL + " VW_ICM_Item{0}{1}";
-        oldSql = strSQL + " TB_ICM_Item{0}{1}";
+        vwCmd = tbCmd = Cmd;
+        List<string> vwCond = new List<string>(Cond); 
+        List<string> tbCond = new List<string>(Cond);
 
-        vwCmd.CommandText = bindContition(todaySql, vwCond);
-        tbCmd.CommandText = bindContition(oldSql, tbCond);
 
-        if (today == inputDate)
+        if (cbNewest.Checked) 
         {
-            dtMain = tp.getIncomingMaterial(vwCmd);
+            if (string.IsNullOrEmpty(beginS))
+            {
+                beginS = bindDayTime("20120101", " 00:00");
+                beginE = today + " 23:59";
+            } 
+
+            vwCond.Add("BEGIN_TIME>=@vwbgTimeStart");
+            vwCmd.Parameters.Add("@vwbgTimeStart", SqlDbType.VarChar).Value = beginS;
+            vwCond.Add("BEGIN_TIME<=@vwbgTimeEnd");
+            vwCmd.Parameters.Add("@vwbgTimeEnd", SqlDbType.VarChar).Value = beginE;
+
+            vwCmd.CommandText = bindContition(todaySql, vwCond);
+
+            mainDt = tp.getData(vwCmd);
         }
         else
         {
-            vwDt = tp.getIncomingMaterial(vwCmd);
-            dtMain = tp.getIncomingMaterial(tbCmd);
+            if (!string.IsNullOrEmpty(beginS))
+            {
+                tbCond.Add("BEGIN_TIME>=@tbBgTimeStart");
+                tbCmd.Parameters.Add("@tbBgTimeStart", SqlDbType.VarChar).Value = beginS;
+            }
 
-            dtMain.Merge(vwDt);
+            if (!string.IsNullOrEmpty(beginE))
+            {
+                tbCond.Add("BEGIN_TIME<=@tbBgTimeEnd");
+                tbCmd.Parameters.Add("@tbBgTimeEnd", SqlDbType.VarChar).Value = beginE;
+            }
+
+            vwCond.Add("BEGIN_TIME>=@vwbgTimeStart");
+            vwCmd.Parameters.Add("@vwbgTimeStart", SqlDbType.VarChar).Value = today + " 00:00";
+            vwCond.Add("BEGIN_TIME<=@vwbgTimeEnd");
+            vwCmd.Parameters.Add("@vwbgTimeEnd", SqlDbType.VarChar).Value = today + " 23:59";
+
+            vwCmd.CommandText = bindContition(todaySql, vwCond);
+            tbCmd.CommandText = bindContition(oldSql, tbCond);
+
+            vwDt = tp.getData(vwCmd);
+            mainDt = tp.getData(tbCmd);
+
+            mainDt.Merge(vwDt);
         }
 
-        return dtMain;
+        return mainDt;
     }
 
-    private string bindContition(string stringSql, List<string> vwCond)
+    private bool checkDateRange(string date)
+    {
+        DateTime inputDate, today;
+        try
+        {
+            inputDate = DateTime.Parse(date);
+            today = DateTime.Today;
+            return inputDate >= today;
+        }
+        catch (Exception)
+        {
+            Response.Write("日期格式錯誤");
+            return false;
+        }        
+    }
+
+    private string bindContition(string SQLString, List<string> condition)
     {
         string sql = string.Format(
-            stringSql,
-            vwCond.Count > 0 ? " WHERE " : "",
-            string.Join(" AND ", vwCond.ToArray())
+            SQLString,
+            condition.Count > 0 ? " WHERE " : "",
+            string.Join(" AND ", condition.ToArray())
             );
         return sql;
-
     }
 
     private string bindDayTime(string strDate, string strTime)
@@ -292,9 +316,10 @@ public partial class _Default : System.Web.UI.Page
     {
 
     }
-    
+
     protected void btnToExcel_Click(object sender, EventArgs e)
-    {
+    {       
+
         cp.ExportToExcel(gvResult);
     }
 }
