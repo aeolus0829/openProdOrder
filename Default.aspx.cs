@@ -4,7 +4,9 @@ using nsCmnPrcs;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data;
-
+using System.Linq;
+using nsCmnPrcs;
+using nsTblPrcs;
 
 public partial class _Default : System.Web.UI.Page
 {
@@ -91,9 +93,8 @@ public partial class _Default : System.Web.UI.Page
         tbCmd = new SqlCommand();
         vwCmd = new SqlCommand();
         Cmd = new SqlCommand();
-        //List<string> vwCond = new List<string>();
-        //List<string> tbCond = new List<string>();
         List<string> Cond = new List<string>();
+        DataTable pruneDt = new DataTable();
         DataTable mainDt = new DataTable();
         DataTable vwDt = new DataTable();
 
@@ -176,23 +177,10 @@ public partial class _Default : System.Web.UI.Page
             Cmd.Parameters.Add("@vendorNm", SqlDbType.VarChar).Value = txtVndrNm.Text.Trim();
         }
 
-        switch (rblStyle.SelectedIndex)
+        if (ddlMvt.SelectedIndex != 0)
         {
-            case 0:
-                if (ddlMvt.SelectedIndex != 0)
-                {
-                    Cond.Add("MOVE_TYPE LIKE '%' + @mvT + '%'");
-                    Cmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
-                }
-                break;
-            case 1: // 印表用樣式只需要這兩種異動類型
-                string mvt104 = "104";
-                string mvt105 = "105";
-                Cond.Add("MOVE_TYPE=' + @mvt104 + '");
-                Cmd.Parameters.Add("@mvt104", SqlDbType.VarChar).Value = mvt104;
-                Cond.Add("MOVE_TYPE=' + @mvt105 + '");
-                Cmd.Parameters.Add("@mvt105", SqlDbType.VarChar).Value = mvt105;
-                break;
+            Cond.Add("MOVE_TYPE LIKE '%' + @mvT + '%'");
+            Cmd.Parameters.Add("@mvT", SqlDbType.VarChar).Value = ddlMvt.SelectedValue;
         }
 
         if (rdblQA.SelectedIndex != 0)
@@ -220,7 +208,7 @@ public partial class _Default : System.Web.UI.Page
         {
             if (string.IsNullOrEmpty(beginS))
             {
-                beginS = bindDayTime("20120101", " 00:00");
+                beginS = "2012/01/01 00:00";
                 beginE = today + " 23:59";
             } 
 
@@ -261,7 +249,48 @@ public partial class _Default : System.Web.UI.Page
             mainDt.Merge(vwDt);
         }
 
-        return mainDt;
+        lookCmdParameters(vwCmd);
+        lookCmdParameters(tbCmd);
+
+        pruneDt = processDt(mainDt);
+
+        return pruneDt;
+    }
+
+    private DataTable processDt(DataTable dt)
+    {
+        switch (rblStyle.SelectedValue)
+        {
+            case "0":  //製造以外刪掉，留A00? U00?
+                dt.Rows.Cast<DataRow>().Where(r =>
+                (!r.ItemArray[12].ToString().Contains("A")) ||
+                (!r.ItemArray[12].ToString().Contains("U"))
+                ).ToList().ForEach(r => r.Delete());
+                break;
+            case "1":  //出貨以外刪掉，留P00?
+                dt.Rows.Cast<DataRow>().Where(r =>
+                !r.ItemArray[12].ToString().Contains("P")).ToList().ForEach(r => r.Delete());
+                break;
+            case "2":  //加工以外刪掉，留L00? S??? B???
+                dt.Rows.Cast<DataRow>().Where(r =>
+                (r.ItemArray[12].ToString().Contains("A")) ||
+                (r.ItemArray[12].ToString().Contains("U")) ||
+                (r.ItemArray[12].ToString().Contains("P"))
+                ).ToList().ForEach(r => r.Delete());
+                break;
+        }
+        return dt;
+    }
+
+}
+
+private void lookCmdParameters(SqlCommand cmd)
+    {
+        foreach (SqlParameter p in cmd.Parameters)
+        {
+            cmd.CommandText = cmd.CommandText.Replace(p.ParameterName, p.Value.ToString());
+        }
+        Response.Write(cmd.CommandText + "<p />");
     }
 
     private bool checkDateRange(string date)
@@ -323,3 +352,4 @@ public partial class _Default : System.Web.UI.Page
         cp.ExportToExcel(gvResult);
     }
 }
+ 
