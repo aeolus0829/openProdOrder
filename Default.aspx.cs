@@ -43,8 +43,7 @@ public partial class _Default : System.Web.UI.Page
         clrBtn();        
     }
     protected void clrBtn()
-    {
-        
+    {        
         txtBpmBeginS.Text="";
         txtBpmBeginE.Text = "";
         txtBpmNo.Text="";
@@ -54,6 +53,7 @@ public partial class _Default : System.Web.UI.Page
         btnToExcel.Visible = false;
         ddlQA.SelectedIndex = 0;
         rdblQA.SelectedIndex = 0;
+        rblStyle.SelectedIndex = 0;
         ddlMvt.SelectedIndex = 0;
         gvResult.Dispose();
         gvResult.Visible = false;
@@ -252,8 +252,9 @@ public partial class _Default : System.Web.UI.Page
             }           
         }
 
-        lookCmdParameters(vwCmd, "vwCmd");
-        lookCmdParameters(tbCmd, "tbCmd");
+        //look sql parameters
+        //lookCmdParameters(vwCmd, "vwCmd");
+        //lookCmdParameters(tbCmd, "tbCmd");
 
         pruneDt = processDt(mainDt);
 
@@ -266,10 +267,10 @@ public partial class _Default : System.Web.UI.Page
         {
             case "0":  //無樣式
                 break;
-            case "1":  //僅留下 104 / 105 異動類型
+            case "1":  //僅留下 104 | 105 異動類型
                 dt.Rows.Cast<DataRow>().Where(r =>
-                (!r.ItemArray[12].ToString().Contains("104")) ||
-                (!r.ItemArray[12].ToString().Contains("105"))
+                (r.ItemArray[12].ToString().Contains("103")) ||
+                (r.ItemArray[12].ToString().Contains("106"))
                 ).ToList().ForEach(r => r.Delete());
                 break;
         }
@@ -288,6 +289,9 @@ private void lookCmdParameters(SqlCommand cmd, string cmdName)
     private bool checkDateRange(string date)
     {
         DateTime inputDate, today;
+
+        if (string.IsNullOrEmpty(date)) return false;
+
         try
         {
             inputDate = DateTime.Parse(date);
