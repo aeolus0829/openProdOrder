@@ -137,9 +137,6 @@ public partial class _Default : System.Web.UI.Page
         if (txtBpmBeginE.Text == "") beginE = bindDayTime(txtBpmBeginS.Text, " 23:59");
         else beginE = bindDayTime(txtBpmBeginE.Text, " 23:59");
 
-        // bool startDayContainToday = checkDateRange(beginS);
-        // bool endDayContainToday = checkDateRange(beginE);
-
         if (txtBpmNo.Text != "")
         {
             Cond.Add("DOC_NBR LIKE '%' + @docNbr + '%'");
@@ -198,7 +195,6 @@ public partial class _Default : System.Web.UI.Page
             Cond.Add(ddlQA.SelectedValue);
         }
 
-        //vwCmd = tbCmd = Cmd;
         SqlCommand vwCmd = Cmd.Clone();
         SqlCommand tbCmd = Cmd.Clone();
         List<string> vwCond = new List<string>(Cond); 
@@ -244,14 +240,20 @@ public partial class _Default : System.Web.UI.Page
             vwCmd.CommandText = bindContition(todaySql, vwCond);
             tbCmd.CommandText = bindContition(oldSql, tbCond);
 
-            vwDt = tp.getData(vwCmd);
+            bool startDayContainToday = checkDateRange(beginS);
+            bool endDayContainToday = checkDateRange(beginE);
+
             mainDt = tp.getData(tbCmd);
 
-            mainDt.Merge(vwDt);
+            if (endDayContainToday)
+            {
+                vwDt = tp.getData(vwCmd);
+                mainDt.Merge(vwDt);
+            }           
         }
 
-        lookCmdParameters(vwCmd);
-        lookCmdParameters(tbCmd);
+        lookCmdParameters(vwCmd, "vwCmd");
+        lookCmdParameters(tbCmd, "tbCmd");
 
         pruneDt = processDt(mainDt);
 
@@ -274,13 +276,13 @@ public partial class _Default : System.Web.UI.Page
         return dt;
     }
 
-private void lookCmdParameters(SqlCommand cmd)
+private void lookCmdParameters(SqlCommand cmd, string cmdName)
     {
         foreach (SqlParameter p in cmd.Parameters)
         {
             cmd.CommandText = cmd.CommandText.Replace(p.ParameterName, p.Value.ToString());
         }
-        Response.Write(cmd.CommandText + "<p />");
+        Response.Write(cmdName + "<p />" + cmd.CommandText + "<p />");
     }
 
     private bool checkDateRange(string date)
