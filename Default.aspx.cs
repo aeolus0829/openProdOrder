@@ -201,7 +201,7 @@ public partial class _Default : System.Web.UI.Page
         List<string> tbCond = new List<string>(Cond);
 
 
-        if (cbNewest.Checked) 
+        if (!cbCacheMode.Checked) 
         {
             if (string.IsNullOrEmpty(beginS))
             {
