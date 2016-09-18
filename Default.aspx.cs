@@ -5,8 +5,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using nsCmnPrcs;
-using nsTblPrcs;
+
 
 public partial class _Default : System.Web.UI.Page
 {
@@ -90,8 +89,8 @@ public partial class _Default : System.Web.UI.Page
 
     private DataTable geneDtWithSqlCondition()
     {
-        tbCmd = new SqlCommand();
-        vwCmd = new SqlCommand();
+        //tbCmd = new SqlCommand();
+        //vwCmd = new SqlCommand();
         Cmd = new SqlCommand();
         List<string> Cond = new List<string>();
         DataTable pruneDt = new DataTable();
@@ -199,7 +198,9 @@ public partial class _Default : System.Web.UI.Page
             Cond.Add(ddlQA.SelectedValue);
         }
 
-        vwCmd = tbCmd = Cmd;
+        //vwCmd = tbCmd = Cmd;
+        SqlCommand vwCmd = Cmd.Clone();
+        SqlCommand tbCmd = Cmd.Clone();
         List<string> vwCond = new List<string>(Cond); 
         List<string> tbCond = new List<string>(Cond);
 
@@ -261,28 +262,17 @@ public partial class _Default : System.Web.UI.Page
     {
         switch (rblStyle.SelectedValue)
         {
-            case "0":  //製造以外刪掉，留A00? U00?
-                dt.Rows.Cast<DataRow>().Where(r =>
-                (!r.ItemArray[12].ToString().Contains("A")) ||
-                (!r.ItemArray[12].ToString().Contains("U"))
-                ).ToList().ForEach(r => r.Delete());
+            case "0":  //無樣式
                 break;
-            case "1":  //出貨以外刪掉，留P00?
+            case "1":  //僅留下 104 / 105 異動類型
                 dt.Rows.Cast<DataRow>().Where(r =>
-                !r.ItemArray[12].ToString().Contains("P")).ToList().ForEach(r => r.Delete());
-                break;
-            case "2":  //加工以外刪掉，留L00? S??? B???
-                dt.Rows.Cast<DataRow>().Where(r =>
-                (r.ItemArray[12].ToString().Contains("A")) ||
-                (r.ItemArray[12].ToString().Contains("U")) ||
-                (r.ItemArray[12].ToString().Contains("P"))
+                (!r.ItemArray[12].ToString().Contains("104")) ||
+                (!r.ItemArray[12].ToString().Contains("105"))
                 ).ToList().ForEach(r => r.Delete());
                 break;
         }
         return dt;
     }
-
-}
 
 private void lookCmdParameters(SqlCommand cmd)
     {
