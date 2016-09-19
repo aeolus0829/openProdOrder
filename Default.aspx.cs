@@ -110,11 +110,12 @@ public partial class _Default : System.Web.UI.Page
         todaySql = strSQL + " VW_ICM_Item{0}{1}";
         oldSql = strSQL + " TB_ICM_Item{0}{1}";
 
+        //檢查起單時間初始值
         beginS = bindDayTime(txtBpmBeginS.Text, " 00:00");
-
         if (txtBpmBeginE.Text == "") beginE = bindDayTime(txtBpmBeginS.Text, " 23:59");
         else beginE = bindDayTime(txtBpmBeginE.Text, " 23:59");
 
+        //檢查各欄位是否有輸入值
         if (txtBpmNo.Text != "")
         {
             Cond.Add("DOC_NBR LIKE '%' + @docNbr + '%'");
@@ -173,12 +174,14 @@ public partial class _Default : System.Web.UI.Page
             Cond.Add(ddlQA.SelectedValue);
         }
 
+        //將共用條件複製一份；省下一半的程式碼
         SqlCommand vwCmd = Cmd.Clone();
         SqlCommand tbCmd = Cmd.Clone();
         List<string> vwCond = new List<string>(Cond); 
         List<string> tbCond = new List<string>(Cond);
 
-
+        //加速模式未啟用；雖然速度較慢，但保證資料是最新的
+        //不過資料量大時，程式可能會噴 timeout exception
         if (!cbCacheMode.Checked) 
         {
             if (string.IsNullOrEmpty(beginS))
@@ -196,7 +199,7 @@ public partial class _Default : System.Web.UI.Page
 
             mainDt = tp.getData(vwCmd);
         }
-        else
+        else //加速模式啟用
         {
             if (!string.IsNullOrEmpty(beginS))
             {
@@ -210,6 +213,7 @@ public partial class _Default : System.Web.UI.Page
                 tbCmd.Parameters.Add("@tbBgTimeEnd", SqlDbType.VarChar).Value = beginE;
             }
 
+            //view 的部份只搜尋今天的資料
             vwCond.Add("BEGIN_TIME>=@vwbgTimeStart");
             vwCmd.Parameters.Add("@vwbgTimeStart", SqlDbType.VarChar).Value = today + " 00:00";
             vwCond.Add("BEGIN_TIME<=@vwbgTimeEnd");
@@ -218,11 +222,13 @@ public partial class _Default : System.Web.UI.Page
             vwCmd.CommandText = bindContition(todaySql, vwCond);
             tbCmd.CommandText = bindContition(oldSql, tbCond);
 
+            //檢查起單日-訖 是否有包含今天的日期
             bool startDayContainToday = checkDateRange(beginS);
             bool endDayContainToday = checkDateRange(beginE);
 
             mainDt = tp.getData(tbCmd);
 
+            //若包含今天的日期，才會去 view 找今天的資料，並合併 dt
             if (endDayContainToday)
             {
                 vwDt = tp.getData(vwCmd);
@@ -234,6 +240,7 @@ public partial class _Default : System.Web.UI.Page
         //lookCmdParameters(vwCmd, "vwCmd");
         //lookCmdParameters(tbCmd, "tbCmd");
 
+        //依輸入樣式的選擇進行過濾
         pruneDt = processDt(mainDt);
 
         return pruneDt;
