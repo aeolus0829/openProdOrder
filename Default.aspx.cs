@@ -33,33 +33,11 @@ public partial class _Default : System.Web.UI.Page
         {
             Response.Redirect("disabled.html");
         }
-        else {
-            if (!IsPostBack) clrBtn();
-        }        
     }
 
     protected void btnClr_Click(object sender, EventArgs e)
     {
-        clrBtn();        
-    }
-    protected void clrBtn()
-    {        
-        txtBpmBeginS.Text="";
-        txtBpmBeginE.Text = "";
-        txtBpmNo.Text="";
-        txtBpmPo.Text="";
-        txtMatnr.Text="";
-        txtVndrNm.Text = "";
-        btnToExcel.Visible = false;
-        ddlQA.SelectedIndex = 0;
-        rdblQA.SelectedIndex = 0;
-        rblStyle.SelectedIndex = 0;
-        ddlMvt.SelectedIndex = 0;
-        gvResult.Dispose();
-        gvResult.Visible = false;
-        Session.Abandon();
-        
-        //Response.Redirect("Default.aspx");
+        Response.Redirect("Default.aspx");
     }
     protected void btnSubmt_Click(object sender, EventArgs e)
     {
