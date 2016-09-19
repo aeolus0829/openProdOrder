@@ -219,7 +219,7 @@
     
     </div>
         <ul>
-            <li style="color: red; font-weight: bold">某些物料不適合在加速模式查詢，例：特採、檢驗時間長</li>
+            <li style="color: red; font-weight: bold">某些狀況在加速模式可能會查不到，例：特採、檢驗時間長的物料</li>
             <li>欄位標示為 % 表示輸入部份資料即可</li>
             <li>未輸入任何條件，只會顯示最近三個月的資料</li>
             <li>日期若起訖為同一天，輸入起始日期就好，格式 20131231</li>
