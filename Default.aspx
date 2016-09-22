@@ -205,15 +205,15 @@
                 <td class="style5">
                     &nbsp;</td>
                 <td class="auto-style1">
+                    &nbsp;</td>
+                <td class="style3">
                     <asp:Button ID="btnSubmt" runat="server" onclick="btnSubmt_Click" Text="查詢" 
                         style="height: 26px; width: 42px;" TabIndex="50" />
                 </td>
-                <td class="style3">
+                <td class="auto-style6">
                     <asp:Button ID="btnClr" runat="server" onclick="btnClr_Click" Text="清除" 
                         TabIndex="51" />
                 </td>
-                <td class="auto-style6">
-                    &nbsp;</td>
             </tr>
         </table>
     

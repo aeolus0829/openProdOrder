@@ -50,7 +50,16 @@ public partial class _Default : System.Web.UI.Page
                 btnToExcel.Visible = true;
                 gvResult.Visible = true;
 
-                dtReslt.DefaultView.Sort = "BPM單號 ASC";
+                switch (rblStyle.SelectedIndex)
+                {
+                    case 0:
+                        dtReslt.DefaultView.Sort = "BPM單號 ASC";
+                        break;
+                    case 1:
+                        dtReslt.DefaultView.Sort = "BPM結單日,採購單號,採購項次 ASC";
+                        break;
+                }
+
 
                 gvResult.DataSource = dtReslt;
                 gvResult.DataBind();
@@ -248,21 +257,44 @@ public partial class _Default : System.Web.UI.Page
 
     private DataTable processDt(DataTable dt)
     {
+        DataTable pruneDt = new DataTable();
+
         switch (rblStyle.SelectedValue)
         {
             case "0":  //無樣式
+                return dt;
                 break;
             case "1":  //僅留下 104 | 105 異動類型
                 dt.Rows.Cast<DataRow>().Where(r =>
                 (r.ItemArray[12].ToString().Contains("103")) ||
                 (r.ItemArray[12].ToString().Contains("106"))
                 ).ToList().ForEach(r => r.Delete());
+
+                pruneDt = removeDataColumns(dt);
+                
                 break;
         }
+        return pruneDt;
+    }
+
+    private DataTable removeDataColumns(DataTable dt)
+    {
+        var keepColNames = new List<string>(){"BPM結單日","物料文件","異動類型",
+            "採購單號","採購項次","供應商", "物料號碼", "工單號碼", "工單料號", "短文", "收貨數", "單位" };
+
+        var allColumns = dt.Columns.Cast<DataColumn>();
+        var allColNames = allColumns.Select(c => c.ColumnName);
+        var removeColNames = allColNames.Except(keepColNames);
+        var colsToRemove = from r in removeColNames
+                           join c in allColumns on r equals c.ColumnName
+                           select c;
+        while (colsToRemove.Any())
+            dt.Columns.Remove(colsToRemove.First());
+
         return dt;
     }
 
-private void lookCmdParameters(SqlCommand cmd, string cmdName)
+    private void lookCmdParameters(SqlCommand cmd, string cmdName)
     {
         foreach (SqlParameter p in cmd.Parameters)
         {
