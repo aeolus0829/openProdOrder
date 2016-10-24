@@ -103,6 +103,7 @@ public partial class _Default : System.Web.UI.Page
             RDpersen AS '樣品負責人', 
             excpMIt as 特採狀態, 
             MOVE_TYPE as '異動類型', 
+            MD_MEMO as '物料文件備註',
             PO as '採購單號', 
             POITEM as '採購項次', 
             VENDOR_NAME as '供應商',
@@ -279,7 +280,7 @@ public partial class _Default : System.Web.UI.Page
 
     private DataTable removeDataColumns(DataTable dt)
     {
-        var keepColNames = new List<string>(){"BPM結單日","物料文件","異動類型",
+        var keepColNames = new List<string>(){"BPM結單日","物料文件","異動類型", "物料文件備註",
             "採購單號","採購項次","供應商", "物料號碼", "工單號碼", "工單料號", "短文", "收貨數", "單位" };
 
         var allColumns = dt.Columns.Cast<DataColumn>();
