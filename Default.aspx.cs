@@ -264,7 +264,6 @@ public partial class _Default : System.Web.UI.Page
         {
             case "0":  //無樣式
                 return dt;
-                break;
             case "1":  //僅留下 104 | 105 異動類型
                 dt.Rows.Cast<DataRow>().Where(r =>
                 (r.ItemArray[12].ToString().Contains("103")) ||
