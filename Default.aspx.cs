@@ -27,6 +27,8 @@ public partial class _Default : System.Web.UI.Page
         lastyear = Convert.ToString(Convert.ToInt16(thisyear) - 1);
         dayBefore3Month = DateTime.Now.AddMonths(-3).ToShortDateString();
 
+        tp.getBPMConnString("PRD");
+
         sw = new System.Diagnostics.Stopwatch();
 
         if (! isFormEnabled)

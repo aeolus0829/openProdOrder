@@ -17,9 +17,23 @@ namespace nsTblPrcs
     {
         // public string connectionString = "Data Source=192.168.0.16;Initial Catalog=jw_dbfdb;Uid=jw;Pwd=jw;";
         //public string connectionString = "Data Source=192.168.0.16;Initial Catalog=PRD;User ID=archer;Password=ko123vr4";
-        public string connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF;User ID=SA;Password=Jinud-98A";
+        public string connectionString;
 
         public bool result = false;
+
+        public string getBPMConnString(string strConn)
+        {
+            switch (strConn.ToUpper())
+            {
+                case "PRD":
+                    connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF;User ID=SA;Password=Jinud-98A";
+                    break;
+                case "DEV":
+                    connectionString = "Data Source=192.168.0.25;Initial Catalog=UOF_DEV;User ID=SA;Password=Jinud-98A";
+                    break;
+            }
+            return strConn;
+        }
 
         public DataTable getData(SqlCommand comm)
         {
